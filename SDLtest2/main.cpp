@@ -22,7 +22,7 @@ int sleeping_time = 1000;
 int x_pos_of_figure = 150;
 int y_pos_of_figure = 0;
 int number_of_figure_next, previous_figure;
-int figure_color_next, figure_color_prev;
+int figure_color_next = 0, figure_color_prev = 0;
 
 SDL_Rect srcRED, srcYELL, srcBLUE;
 SDL_Texture *block = nullptr;
@@ -40,7 +40,9 @@ int Generate_Random_Number(int a, int b) {
 	uniform_real_distribution<double> rand(a, b);
 	return rand(rd);
 }
-int Generate_New_Figure(SDL_Rect &color) {
+void Generate_New_Figure(SDL_Rect &color, Figure &active) {
+	
+	active = *(figures + number_of_figure_next);
 	
 	previous_figure = number_of_figure_next;
 	
@@ -49,13 +51,8 @@ int Generate_New_Figure(SDL_Rect &color) {
 	if (number_of_figure_next == previous_figure)
 		goto regen;
 
-	figure_color_prev = figure_color_next;
-
-REcolor:
-	figure_color_next = Generate_Random_Number(0, 1);
-	if (figure_color_next == figure_color_prev)
-		goto REcolor;
 	
+	/*
 	switch (figure_color_next)
 	{
 	case(0):
@@ -72,7 +69,12 @@ REcolor:
 		break;
 	}
 
-	return number_of_figure_next;
+	figure_color_prev = figure_color_next;
+
+REcolor:
+	figure_color_next = Generate_Random_Number(0, 1);
+	if (figure_color_next == figure_color_prev)
+		goto REcolor;	*/
 }
 SDL_Texture *Image_Load(string image, SDL_Renderer *renderer) {
 	SDL_Surface *load_image = nullptr;
@@ -156,8 +158,7 @@ bool The_Game(bool &loss, SDL_Renderer *renderer, SDL_Rect &color, Figure &activ
 			x_pos_of_figure = 150;
 			y_pos_of_figure = -CELL_SIZE;
 
-			active = *(figures + number_of_figure_next);
-			Generate_New_Figure(color);
+			Generate_New_Figure(color, active);
 
 			SDL_RenderClear(renderer);
 			Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
@@ -214,9 +215,8 @@ bool The_Game(bool &loss, SDL_Renderer *renderer, SDL_Rect &color, Figure &activ
 				if (!loss) {
 					x_pos_of_figure = 150;
 					y_pos_of_figure = -CELL_SIZE;
-
-					active = *(figures + number_of_figure_next);
-					Generate_New_Figure(color);
+										
+					Generate_New_Figure(color, active);
 
 					SDL_RenderClear(renderer);
 					Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
@@ -225,8 +225,9 @@ bool The_Game(bool &loss, SDL_Renderer *renderer, SDL_Rect &color, Figure &activ
 				}
 			}
 		}
-		//cout << "\nPADAU! -\t" << curr_time - time(NULL);
+		cout << "\nPADAU! -\t";
 		SDL_RenderClear(renderer);
+		
 		y_pos_of_figure += CELL_SIZE;
 		Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 		Shadow_Render(renderer);
@@ -300,7 +301,7 @@ int main(int argc, char * argv[]) {
 		//cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
 		return 1;
 	}
-
+	
 	block = Image_Load("Squares.bmp", renderer);
 
 	bool loss = false;
@@ -318,12 +319,11 @@ int main(int argc, char * argv[]) {
 	}
 	*/
 		
-	SDL_Rect color;
+	SDL_Rect color = srcYELL;
 	
 	previous_figure = 0;
-
-	active = *(figures + number_of_figure_next);
-	Generate_New_Figure(color);
+		
+	Generate_New_Figure(color, active);
 		
 	thread th2(The_Game, ref(loss), renderer, ref(color), ref(active));
 	th2.detach();
@@ -433,9 +433,8 @@ int main(int argc, char * argv[]) {
 
 						x_pos_of_figure = 150;
 						y_pos_of_figure = -CELL_SIZE;
-
-						active = *(figures + number_of_figure_next);
-						Generate_New_Figure(color);
+												
+						Generate_New_Figure(color, active);
 					}
 					else {
 
@@ -487,9 +486,8 @@ int main(int argc, char * argv[]) {
 							if (!loss) {
 								x_pos_of_figure = 150;
 								y_pos_of_figure = -CELL_SIZE;
-
-								active = *(figures + number_of_figure_next);
-								Generate_New_Figure(color);
+																
+								Generate_New_Figure(color, active);
 
 								SDL_RenderClear(renderer);
 								Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
