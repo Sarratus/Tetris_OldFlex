@@ -139,6 +139,16 @@ void Shadow_Render(SDL_Renderer *renderer) {
 			}
 		}
 }
+void Shadow_cells_show() {
+	for (int i = 0; i < HEIGHT_OF_PLAYING_FIELD; i++)
+	{
+		//cout << "\n";
+		for (int j = 0; j < width_of_playing_field; j++)
+		{
+			//cout << shadow_sells[j][i].square << "\t";
+		}
+	}
+}
 bool The_Game(bool &loss, SDL_Renderer *renderer, SDL_Rect &color, Figure &active) {
 	bool flagB = true;
 	int number_of_figure = 0, previous_figure = 0;
@@ -194,7 +204,7 @@ bool The_Game(bool &loss, SDL_Renderer *renderer, SDL_Rect &color, Figure &activ
 						}
 						//cout << "\nLine deleted!\n";
 						SDL_RenderClear(renderer);
-						
+						Shadow_cells_show();
 						for (int j = 0; j < width_of_playing_field; j++)
 							for (int k = HEIGHT_OF_PLAYING_FIELD - i - 1; k >= 0; k--)
 							{
@@ -205,7 +215,7 @@ bool The_Game(bool &loss, SDL_Renderer *renderer, SDL_Rect &color, Figure &activ
 									shadow_sells[j][k + 1].color = shadow_sells[j][k].color;
 								}
 							}
-						
+						Shadow_cells_show();
 						this_thread::sleep_for(chrono::milliseconds(sleeping_time / 5));
 						Shadow_Render(renderer);
 						SDL_RenderPresent(renderer);
@@ -467,7 +477,7 @@ int main(int argc, char * argv[]) {
 									}
 									//cout << "\nLine deleted!\n";
 									SDL_RenderClear(renderer);
-									
+									//									Shadow_cells_show();
 									for (int j = 0; j < width_of_playing_field; j++)
 										for (int k = i - 1; k >= 0; k--)
 										{
@@ -478,7 +488,7 @@ int main(int argc, char * argv[]) {
 												shadow_sells[j][k + 1].color = shadow_sells[j][k].color;
 											}
 										}
-									
+									//									Shadow_cells_show();
 									this_thread::sleep_for(chrono::milliseconds(sleeping_time / 8));
 									Shadow_Render(renderer);
 									SDL_RenderPresent(renderer);
