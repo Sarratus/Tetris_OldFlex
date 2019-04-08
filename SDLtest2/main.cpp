@@ -5,6 +5,7 @@
 #include <thread>
 #include <chrono>
 #include <random>
+#include <atomic>
 
 //#include <ctime>
 
@@ -37,10 +38,12 @@ Figure2 figures2[number_of_figures];
 int Generate_Random_Number(int a, int b) {
 	random_device rd;
 	mt19937 rng(rd());
-	uniform_real_distribution<double> rand(a, b);
+	uniform_int_distribution<int> rand(a, b);
 	return rand(rd);
 }
 void Generate_New_Figure(SDL_Rect &color, Figure &active) {
+	
+	cout << "new figure! =)";
 	
 	active = *(figures + number_of_figure_next);
 	
@@ -49,10 +52,8 @@ void Generate_New_Figure(SDL_Rect &color, Figure &active) {
 	regen:
 	number_of_figure_next = Generate_Random_Number(0, 6); 
 	if (number_of_figure_next == previous_figure)
-		goto regen;
-
+		goto regen;	
 	
-	/*
 	switch (figure_color_next)
 	{
 	case(0):
@@ -72,9 +73,9 @@ void Generate_New_Figure(SDL_Rect &color, Figure &active) {
 	figure_color_prev = figure_color_next;
 
 REcolor:
-	figure_color_next = Generate_Random_Number(0, 1);
+	figure_color_next = Generate_Random_Number(0, 2);
 	if (figure_color_next == figure_color_prev)
-		goto REcolor;	*/
+		goto REcolor;
 }
 SDL_Texture *Image_Load(string image, SDL_Renderer *renderer) {
 	SDL_Surface *load_image = nullptr;
@@ -199,7 +200,7 @@ bool The_Game(bool &loss, SDL_Renderer *renderer, SDL_Rect &color, Figure &activ
 						for (int j = 0; j < width_of_playing_field; j++)
 							for (int k = HEIGHT_OF_PLAYING_FIELD - i - 1; k >= 0; k--)
 							{
-								//cout << "Flexing";
+								cout << "Flexing";
 								if (shadow_sells[j][k].square) {
 									shadow_sells[j][k + 1].square = shadow_sells[j][k].square;
 									shadow_sells[j][k].square = false;
@@ -264,11 +265,11 @@ int main(int argc, char * argv[]) {
 
 	*(figures + 0) = { { 1,1,1,1,0,0,0,0,0,0 }, {100} };	*(figures + 8) = { { 0,1,0,0,1,0,1,0,1,0 }, {150} };	*(figures + 9) = { { 0,0,1,1,1,1,0,0,0,0 }, {100} };	*(figures + 10) = { { 0,1,1,0,0,1,1,0,0,0 }, {150} };
 	*(figures + 1) = { { 0,1,1,1,1,0,0,0,0,0 }, {100} };	*(figures + 11) = { { 0,1,0,0,1,1,1,0,0,0 }, {150} };
-	*(figures + 2) = { { 1,0,0,1,1,1,0,0,0,0 }, {100} };	*(figures + 17) = { { 0,0,1,0,0,1,1,0,1,0 }, {150} };	*(figures + 18) = { { 1,1,1,0,0,1,0,0,0,0 }, {100} };	  *(figures + 19) = { { 0,1,1,0,1,0,0,0,1,0 }, {150} };
+	*(figures + 2) = { { 1,0,0,1,1,1,0,0,0,0 }, {100} };	*(figures + 17) = { { 0,0,1,0,0,1,1,0,1,0 }, {150} };	*(figures + 18) = { { 1,1,1,0,0,1,0,0,0,0 }, {100} };	*(figures + 19) = { { 0,1,1,0,1,0,0,0,1,0 }, {150} };
 	*(figures + 3) = { { 1,1,0,0,1,1,0,0,0,0 }, {100} };	*(figures + 12) = { { 0,0,1,0,1,1,0,0,1,0 }, {150} };
 	*(figures + 4) = { { 0,0,1,0,0,1,1,1,0,0 }, {200} };	*(figures + 16) = { { 1,1,1,0,0,0,0,0,0,1 }, {50} };
 	*(figures + 5) = { { 0,1,1,0,1,1,0,0,0,0 }, {100} };
-	*(figures + 6) = { { 0,0,1,0,1,1,1,0,0,0 }, {150} };	*(figures + 13) = { { 1,1,1,0,1,0,0,0 }, {100} };	*(figures + 14) = { { 0,1,0,0,1,1,0,0,1,0 }, {150} };	  *(figures + 15) = { { 0,1,0,1,1,1,0,0,0,0 }, {100} };
+	*(figures + 6) = { { 0,0,1,0,1,1,1,0,0,0 }, {150} };	*(figures + 13) = { { 1,1,1,0,1,0,0,0 }, {100} };		*(figures + 14) = { { 0,1,0,0,1,1,0,0,1,0 }, {150} };	*(figures + 15) = { { 0,1,0,1,1,1,0,0,0,0 }, {100} };
 
 	*(figures + 7) = { { 0,0,0,0,0,0,0,0 }, {0} };
 
@@ -320,6 +321,7 @@ int main(int argc, char * argv[]) {
 	*/
 		
 	SDL_Rect color = srcYELL;
+	figure_color_next = 1;
 	
 	previous_figure = 0;
 		
@@ -329,18 +331,18 @@ int main(int argc, char * argv[]) {
 	th2.detach();
 	//cout << "Event tracker will started";
 	while (!loss) {
-		this_thread::sleep_for(chrono::milliseconds(sleeping_time / 25));
+//		cout << "chityy";
 		SDL_Event event;
 		while (SDL_PollEvent(&event)) {
 			switch (event.type) {
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym) {
 				case SDLK_LEFT: {
-					//cout << "Left arrow pressed";
+					cout << "Left arrow pressed";
 					bool flag = true;
 
-					int arrayLOL[6][2] = {
-							{1, 0}, {1, 1}, {1, 2}, {0, 0}, {0, 1}, {0, 2} };
+					int arrayLOL[10][2] = {
+							{1, 0}, {1, 1}, {1, 2}, {0, 0}, {0, 1}, {0, 2}, {-1, 2}, {-2, 2}, {-1, 1}, {1, -1} };
 
 					if (x_pos_of_figure == 0) {
 						flag = false;
@@ -349,7 +351,7 @@ int main(int argc, char * argv[]) {
 					else {
 						if (x_pos_of_figure != 0)
 						{
-							for (int i = 0; i < 6; i++)
+							for (int i = 0; i < 10; i++)
 								if (*(active.figure + i))
 									if (shadow_sells[x_pos_of_figure / CELL_SIZE - arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) {
 										flag = false;
@@ -373,8 +375,8 @@ int main(int argc, char * argv[]) {
 
 					bool flagR = true;
 
-					int arrayLOL[8][2] = {
-							{1, 0}, {1, 1}, {1, 2}, {2, 0}, {2, 1}, {2, 2}, {3, 3}, {4, 3} };
+					int arrayLOL[10][2] = {
+							{1, 0}, {1, 1}, {1, 2}, {2, 0}, {2, 1}, {2, 2}, {3, 3}, {4, 3}, {3, 1}, {1, -1} };
 
 					if (x_pos_of_figure + active.figure_width == width) {
 						flagR = false;
@@ -383,7 +385,7 @@ int main(int argc, char * argv[]) {
 					else {
 						if (x_pos_of_figure != width - active.figure_width)
 						{
-							for (int i = 0; i < 8; i++)
+							for (int i = 0; i < 10; i++)
 								if (*(active.figure + i))
 									if (shadow_sells[x_pos_of_figure / CELL_SIZE + arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) {
 										flagR = false;
@@ -411,6 +413,7 @@ int main(int argc, char * argv[]) {
 						if (equal(begin(active.figure), end(active.figure), begin((figures + figures_changes[i][0])->figure))) {
 							active = *(figures + figures_changes[i][1]);
 							is_updated = true;
+							th2.~thread();
 							break;
 						}
 
@@ -446,8 +449,13 @@ int main(int argc, char * argv[]) {
 								if (shadow_sells[x_pos_of_figure / CELL_SIZE + arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) { flagB = false; }
 
 						if (!flagB) {
-							if (y_pos_of_figure == 0)
+							if (y_pos_of_figure == 0) {
 								loss = true;
+								break;
+								break;
+								
+							}
+								
 
 							Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
 							active = *(figures + 7);
@@ -511,11 +519,12 @@ int main(int argc, char * argv[]) {
 				break;
 			}
 		}
+		this_thread::sleep_for(chrono::milliseconds(sleeping_time / 25));
 	}
-
+	cout << "End of the cycle - " << loss;
 	if (loss)
 	{
-		//cout << "You are loss. NOOB! (Hahahahahahahah)";
+		cout << "You are loss. NOOB! (Hahahahahahahah)";
 		this_thread::sleep_for(chrono::milliseconds(sleeping_time * 20));
 	}
 
