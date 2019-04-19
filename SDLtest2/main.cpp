@@ -25,7 +25,7 @@ int y_pos_of_figure = 0;
 int number_of_figure_next, previous_figure;
 int figure_color_next = 0, figure_color_prev = 0;
 
-SDL_Rect srcRED, srcYELL, srcBLUE;
+SDL_Rect srcRED, srcYELL, srcBLUE, srcGREEN, srcMAGNT, srcCYAN;
 SDL_Texture *block = nullptr;
 enum Color { Red = 1, Yellow, Blue };
 struct Figure { bool figure[10] = { 0,0,0,0,0,0,0,0,0,0 }; int figure_width = 0; };
@@ -58,22 +58,38 @@ void Generate_New_Figure(SDL_Rect &color, Figure &active) {
 	{
 	case(0):
 		color = srcRED;
+		cout << "\nRed";
 		break;
 	case(1):
 		color = srcYELL;
+		cout << "\nYellow";
 		break;
 	case(2):
 		color = srcBLUE;
+		cout << "\nBlue";
+		break;
+	case(3):
+		color = srcGREEN;
+		cout << "\nGreen";
+		break;
+	case(4):
+		color = srcMAGNT;
+		cout << "\nMagenta";
+		break;
+	case(5):
+		color = srcCYAN;
+		cout << "\nCyan";
 		break;
 	default:
 		color = srcYELL;
+		cout << "\nYellow";
 		break;
 	}
 
 	figure_color_prev = figure_color_next;
 
 REcolor:
-	figure_color_next = Generate_Random_Number(0, 2);
+	figure_color_next = Generate_Random_Number(0, 5);
 	if (figure_color_next == figure_color_prev)
 		goto REcolor;
 }
@@ -122,6 +138,8 @@ void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, S
 		Render(x + 2 * CELL_SIZE, y + CELL_SIZE, block, renderer, &color_of_figure);
 	if (*(figure + 9))
 		Render(x, y - 1 * CELL_SIZE, block, renderer, &color_of_figure);
+
+
 }
 void Rewrite_of_shadow_cells(Figure active, int x_pos_of_figure, int y_pos_of_figure, SDL_Rect color) {
 
@@ -226,7 +244,7 @@ bool The_Game(bool &loss, SDL_Renderer *renderer, SDL_Rect &color, Figure &activ
 				}
 			}
 		}
-		cout << "\nPADAU! -\t";
+//		cout << "\nPADAU! -\t";
 		SDL_RenderClear(renderer);
 		
 		y_pos_of_figure += CELL_SIZE;
@@ -239,7 +257,7 @@ bool The_Game(bool &loss, SDL_Renderer *renderer, SDL_Rect &color, Figure &activ
 void Menu(bool &start) {
 
 	while (!start) {
-		cout << "Zhdy...";
+//		cout << "Zhdy...";
 		SDL_Event event1;
 		while (SDL_PollEvent(&event1)) {
 			switch (event1.type) {
@@ -273,10 +291,10 @@ int main(int argc, char * argv[]) {
 
 	*(figures + 7) = { { 0,0,0,0,0,0,0,0 }, {0} };
 
-	srcRED.h = CELL_SIZE;		srcYELL.h = CELL_SIZE;		srcBLUE.h = CELL_SIZE;
-	srcRED.w = CELL_SIZE;		srcYELL.w = CELL_SIZE;		srcBLUE.y = CELL_SIZE;
-	srcRED.x = 0;		srcYELL.x = 50;		srcBLUE.x = 100;
-	srcRED.y = 0;		srcYELL.y = 0;		srcBLUE.y = 0;
+	srcRED.h = CELL_SIZE;		srcYELL.h = CELL_SIZE;		srcBLUE.h = CELL_SIZE;		srcGREEN.h = CELL_SIZE;		srcMAGNT.h = CELL_SIZE;		srcCYAN.h = CELL_SIZE;
+	srcRED.w = CELL_SIZE;		srcYELL.w = CELL_SIZE;		srcBLUE.w = CELL_SIZE;		srcGREEN.w = CELL_SIZE;		srcMAGNT.w = CELL_SIZE;		srcCYAN.w = CELL_SIZE;
+	srcRED.x = 0;				srcYELL.x = 50;				srcBLUE.x = 100;			srcGREEN.x = 150;			srcMAGNT.x = 200;			srcCYAN.x = 250;
+	srcRED.y = 0;				srcYELL.y = 0;				srcBLUE.y = 0;				srcGREEN.y = 0;				srcMAGNT.y = 0;				srcCYAN.y = 0;
 
 	shadow_sells = new Shadow_Cell*[width_of_playing_field];
 	for (int i1 = 0; i1 < width_of_playing_field; i1++)
@@ -319,7 +337,8 @@ int main(int argc, char * argv[]) {
 		this_thread::sleep_for(chrono::milliseconds(16));
 	}
 	*/
-		
+
+	
 	SDL_Rect color = srcYELL;
 	figure_color_next = 1;
 	
@@ -337,6 +356,121 @@ int main(int argc, char * argv[]) {
 			switch (event.type) {
 			case SDL_KEYDOWN:
 				switch (event.key.keysym.sym) {
+				case SDLK_SPACE: {
+										
+					bool on_floor = false;
+					int inert = 45;
+					SDL_Rect flag = color;
+
+					while (!on_floor && !loss && flag.x == color.x) {
+						
+						bool flagB = true;						
+
+						if (y_pos_of_figure >= CELL_SIZE * 17) {
+
+							on_floor = true;
+
+							Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
+							active = *(figures + 7);							
+
+							x_pos_of_figure = 150;
+							y_pos_of_figure = -CELL_SIZE;
+							
+							Generate_New_Figure(color, active);
+
+							SDL_RenderClear(renderer);
+							Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
+							Shadow_Render(renderer);
+							SDL_RenderPresent(renderer);
+						}
+						else {
+
+
+							int arrayLOL[10][2] = { { 0, 1 }, { 0, 2 }, { 0, 3 }, { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 3 }, { 3, 3 }, { 2, 2 }, { 0, 0 } };
+
+							for (int i = 0; i < 10; i++)
+								if (*(active.figure + i))
+									if (shadow_sells[x_pos_of_figure / CELL_SIZE + arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) { flagB = false; on_floor = true; }
+
+							if (!flagB) {
+								if (y_pos_of_figure == 0) {
+									loss = true;
+									break;
+									break;
+
+								}
+
+
+								Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
+								active = *(figures + 7);
+
+								for (int i = 0; i < HEIGHT_OF_PLAYING_FIELD; i++)
+									if (shadow_sells[0][i].square && shadow_sells[1][i].square && shadow_sells[2][i].square && shadow_sells[3][i].square && shadow_sells[4][i].square && shadow_sells[5][i].square && shadow_sells[6][i].square && shadow_sells[7][i].square && shadow_sells[8][i].square && shadow_sells[9][i].square) {
+
+										//cout << "\nLine cheked!\n";
+										for (int j = 0; j < width_of_playing_field; j++)
+										{
+											this_thread::sleep_for(chrono::milliseconds(sleeping_time / 20));
+											SDL_RenderClear(renderer);
+											shadow_sells[j][i].square = false;
+											Shadow_Render(renderer);
+											SDL_RenderPresent(renderer);
+										}
+										//cout << "\nLine deleted!\n";
+										SDL_RenderClear(renderer);
+
+										for (int j = 0; j < width_of_playing_field; j++)
+											for (int k = i - 1; k >= 0; k--)
+											{
+												//cout << "Flexing";
+												if (shadow_sells[j][k].square) {
+													shadow_sells[j][k + 1].square = shadow_sells[j][k].square;
+													shadow_sells[j][k].square = false;
+													shadow_sells[j][k + 1].color = shadow_sells[j][k].color;
+												}
+											}
+
+										this_thread::sleep_for(chrono::milliseconds(sleeping_time / 8));
+										Shadow_Render(renderer);
+										SDL_RenderPresent(renderer);
+									}
+
+								if (!loss) {
+									
+									on_floor = true;
+																		
+									x_pos_of_figure = 150;
+									y_pos_of_figure = -CELL_SIZE;
+
+									Generate_New_Figure(color, active);
+
+									SDL_RenderClear(renderer);
+									Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
+									Shadow_Render(renderer);
+									SDL_RenderPresent(renderer);
+								}
+							}
+						}
+						if (flagB)
+						{
+							y_pos_of_figure += CELL_SIZE;
+							
+							SDL_RenderClear(renderer);
+
+							Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
+							Shadow_Render(renderer);
+
+							SDL_RenderPresent(renderer);
+
+							this_thread::sleep_for(chrono::milliseconds(inert));
+							if (inert >= 12) {
+								inert -= 12;
+							}
+						};
+					}
+				}
+					this_thread::sleep_for(chrono::milliseconds(sleeping_time / 10));
+					break;
 				case SDLK_LEFT: {
 					cout << "Left arrow pressed";
 					bool flag = true;
@@ -376,7 +510,7 @@ int main(int argc, char * argv[]) {
 					bool flagR = true;
 
 					int arrayLOL[10][2] = {
-							{1, 0}, {1, 1}, {1, 2}, {2, 0}, {2, 1}, {2, 2}, {3, 3}, {4, 3}, {3, 1}, {1, -1} };
+							{1, 0}, {1, 1}, {1, 2}, {2, 0}, {2, 1}, {2, 2}, {3, 3}, {4, 3}, {3, 2}, {1, -1} };
 
 					if (x_pos_of_figure + active.figure_width == width) {
 						flagR = false;
@@ -423,7 +557,7 @@ int main(int argc, char * argv[]) {
 						Shadow_Render(renderer);
 						SDL_RenderPresent(renderer);
 					}
-					this_thread::sleep_for(chrono::milliseconds(sleeping_time / 10));
+					this_thread::sleep_for(chrono::milliseconds(sleeping_time / 8));
 					break;
 				}}
 				case SDLK_DOWN:
@@ -438,6 +572,11 @@ int main(int argc, char * argv[]) {
 						y_pos_of_figure = -CELL_SIZE;
 												
 						Generate_New_Figure(color, active);
+
+						SDL_RenderClear(renderer);
+						Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
+						Shadow_Render(renderer);
+						SDL_RenderPresent(renderer);
 					}
 					else {
 
@@ -522,6 +661,7 @@ int main(int argc, char * argv[]) {
 		this_thread::sleep_for(chrono::milliseconds(sleeping_time / 25));
 	}
 	cout << "End of the cycle - " << loss;
+	
 	if (loss)
 	{
 		cout << "You are loss. NOOB! (Hahahahahahahah)";
@@ -529,4 +669,6 @@ int main(int argc, char * argv[]) {
 	}
 
 	return 0;
+
+	
 }
