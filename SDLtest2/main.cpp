@@ -6,6 +6,7 @@
 #include <chrono>
 #include <random>
 #include <atomic>
+#include <SDL_ttf.h>
 
 //#include <ctime>
 
@@ -116,8 +117,7 @@ void Render(int x, int y, SDL_Texture *image, SDL_Renderer *renderer, SDL_Rect *
 	SDL_RenderCopy(renderer, image, srcrect, &pos);
 }
 void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, SDL_Renderer *renderer) {
-
-
+	
 	if (*(figure + 0))
 		Render(x, y, block, renderer, &color_of_figure);
 	if (*(figure + 1))
@@ -138,8 +138,7 @@ void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, S
 		Render(x + 2 * CELL_SIZE, y + CELL_SIZE, block, renderer, &color_of_figure);
 	if (*(figure + 9))
 		Render(x, y - 1 * CELL_SIZE, block, renderer, &color_of_figure);
-
-
+	
 }
 void Rewrite_of_shadow_cells(Figure active, int x_pos_of_figure, int y_pos_of_figure, SDL_Rect color) {
 
@@ -254,27 +253,72 @@ bool The_Game(bool &loss, SDL_Renderer *renderer, SDL_Rect &color, Figure &activ
 	}
 	return 0;
 }
-void Menu(bool &start) {
+void Menu(bool &start, SDL_Renderer *renderer, SDL_Rect color, Figure active) {
 
-	while (!start) {
-//		cout << "Zhdy...";
-		SDL_Event event1;
-		while (SDL_PollEvent(&event1)) {
-			switch (event1.type) {
-			case SDL_KEYDOWN:
-				switch (event1.key.keysym.sym) {
-				case SDLK_RETURN: {
-					start = true;
-					break;
-				}
-				case SDLK_UP: {
-					cout << "Druguyu zhmi";
-					break;
-				}
-				}
-			}
+	unsigned short int angle = 0;
+	short int change = 2;
+	SDL_Rect dst;
+	dst.h = 600;		dst.w = 600;
+	dst.x = width - dst.w / 2 - 50;	dst.y = height / 2 - dst.h / 2 - 200;
+		
+	TTF_Font* Sans = nullptr;
+	Sans = TTF_OpenFont("C:\\Users\\User\\source\\repos\\SDLtest2\\Debug\\Pixelnaya_Zalupa.ttf", 24);
+	SDL_Color White = { 255, 255, 255 };
+	
+	SDL_Surface* message_surface = nullptr;
+	SDL_Texture* message = nullptr;
+	
+	if(Sans != nullptr)
+		message_surface = TTF_RenderText_Blended(Sans, "Press Enter to start", White);
+	
+	if (message_surface != nullptr)
+	{
+		message = SDL_CreateTextureFromSurface(renderer, message_surface);
+		SDL_FreeSurface(message_surface);
+	}
+	TTF_CloseFont(Sans);	
+
+	SDL_Rect Message_rect; 
+	Message_rect.w = 410;
+	Message_rect.h = 33;
+	Message_rect.x = width / 2 - Message_rect.w / 2 + 3;
+	Message_rect.y = 700; 
+
+	while (!start) {		
+
+		SDL_RenderClear(renderer);
+		
+		SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle++, NULL, SDL_FLIP_NONE);
+
+		SDL_RenderCopyEx(renderer, message, NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
+		
+		SDL_RenderPresent(renderer);
+
+		dst.h += change;
+		dst.w += change;
+				
+		if (dst.h == 700)
+			change *= -1;
+		if (dst.h == 600)
+			change *= -1;						
+		
+		
+
+		this_thread::sleep_for(chrono::milliseconds(40));
+	}
+	if (start)
+	{		
+		/*while (true)
+		{
+
 		}
-		this_thread::sleep_for(chrono::milliseconds(50));
+		SDL_RenderClear(renderer);
+
+		SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle++, NULL, SDL_FLIP_NONE);
+
+		SDL_RenderCopyEx(renderer, message, NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
+
+		SDL_RenderPresent(renderer);*/
 	}
 }
 
@@ -302,6 +346,10 @@ int main(int argc, char * argv[]) {
 		*(shadow_sells + i1) = new Shadow_Cell[HEIGHT_OF_PLAYING_FIELD];
 	}
 
+	if (TTF_Init() == -1)
+	{
+		//cout << "SDL_ttf initialization failed.";
+	}
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
 	{
 		//cout << "SDL initialization failed. SDL Error: " << SDL_GetError();
@@ -326,28 +374,51 @@ int main(int argc, char * argv[]) {
 	bool loss = false;
 
 	Figure active;
-
-	/*
-	bool start = false;
-	thread Menu(Menu, ref(start));
-	Menu.detach();
-
-	while (!start)
-	{
-		this_thread::sleep_for(chrono::milliseconds(16));
-	}
-	*/
+	
 
 	
 	SDL_Rect color = srcYELL;
 	figure_color_next = 1;
 	
 	previous_figure = 0;
+
+	bool start = false;
+	thread Menu(Menu, ref(start), ref(renderer), color, active);
+	
+	while (!start)
+	{
+		SDL_Event event1;
+		while (SDL_PollEvent(&event1)) {
+			switch (event1.type) {
+			case SDL_KEYDOWN:
+				switch (event1.key.keysym.sym) {
+				case SDLK_RETURN: {
+					start = true;
+					break;
+				}
+				case SDLK_UP: {
+					cout << "Druguyu zhmi";
+					break;
+				}
+				case SDLK_SPACE: {
+					cout << "space";
+					break;
+				}
+				}
+			}
+		}
+		this_thread::sleep_for(chrono::milliseconds(16));
+	}
+
+	Menu.join();
+
+	TTF_Quit();
 		
 	Generate_New_Figure(color, active);
 		
 	thread th2(The_Game, ref(loss), renderer, ref(color), ref(active));
 	th2.detach();
+	
 	//cout << "Event tracker will started";
 	while (!loss) {
 //		cout << "chityy";
