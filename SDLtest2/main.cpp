@@ -233,9 +233,9 @@ bool The_Game(bool &loss, SDL_Renderer *renderer, SDL_Rect &color, Figure &activ
 	}
 	return 0;
 }
-void Menu(bool &start, SDL_Renderer *renderer, SDL_Rect color, Figure active) {
+void Menu(bool& start, SDL_Renderer* renderer, SDL_Rect color, Figure active, SDL_Window* window) {
 
-	unsigned short int angle = 0;
+	double angle = 0;
 	short int change = 2;
 	SDL_Rect dst;
 	dst.h = 600;		dst.w = 600;
@@ -243,7 +243,7 @@ void Menu(bool &start, SDL_Renderer *renderer, SDL_Rect color, Figure active) {
 		
 	TTF_Font* Sans = nullptr;
 	Sans = TTF_OpenFont("C:\\Users\\User\\source\\repos\\SDLtest2\\Debug\\Pixelnaya_Zalupa.ttf", 24);
-	SDL_Color White = { 255, 255, 255 };
+	SDL_Color White = { 150, 200, 255 };
 	
 	SDL_Surface* message_surface = nullptr;
 	SDL_Texture* message = nullptr;
@@ -259,13 +259,13 @@ void Menu(bool &start, SDL_Renderer *renderer, SDL_Rect color, Figure active) {
 	TTF_CloseFont(Sans);	
 
 	SDL_Rect Message_rect; 
-	Message_rect.w = 410;
-	Message_rect.h = 33;
+	Message_rect.w = 390;
+	Message_rect.h = 26;
 	Message_rect.x = width / 2 - Message_rect.w / 2 + 3;
 	Message_rect.y = 700; 
 
 	while (!start) {		
-
+				
 		SDL_RenderClear(renderer);
 		
 		SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle++, NULL, SDL_FLIP_NONE);
@@ -288,17 +288,115 @@ void Menu(bool &start, SDL_Renderer *renderer, SDL_Rect color, Figure active) {
 	}
 	if (start)
 	{		
-		/*for (int i = 0; i < length; i++)
+		unsigned int opacity = 255, time_pause = 40, steps = 130;
+		double rotation = 1;
+
+
+		for (int i = 0; i < steps; i++)
 		{
+			SDL_RenderClear(renderer);
 
+			if (opacity > 1)
+				SDL_SetTextureAlphaMod(message, --(--opacity));			
+
+			angle += rotation;
+			rotation += 0.03;
+
+			SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle, NULL, SDL_FLIP_NONE);
+			SDL_RenderCopyEx(renderer, message, NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
+			
+			SDL_RenderPresent(renderer);
+
+			this_thread::sleep_for(chrono::milliseconds(time_pause));
+			if (time_pause > 16)
+				--time_pause;
 		}
-		SDL_RenderClear(renderer);
+		steps = 130;
+		
+		int del_x = ((dst.x + dst.w / 2) - (width / 2)) / steps;
+		int del_y = ((dst.y + dst.h / 2) - (height / 2)) / steps;
 
-		SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle++, NULL, SDL_FLIP_NONE);
+		cout << " " << dst.x << " " << width;
+		steps += 100;
+		
+		for (int i = 0; i < steps; i++)
+		{
+			//cout << "step" << del_x;
+			SDL_RenderClear(renderer);
 
-		SDL_RenderCopyEx(renderer, message, NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
+			angle += rotation;
+			rotation += 0.07;
 
-		SDL_RenderPresent(renderer);*/
+			if (dst.x + dst.w / 2 != width / 2)
+				--dst.x;
+			if (dst.y + dst.h / 2 != height / 2)
+				++dst.y;
+
+			SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle, NULL, SDL_FLIP_NONE);
+		
+			SDL_RenderPresent(renderer);
+
+			this_thread::sleep_for(chrono::milliseconds(time_pause));
+		}	
+
+		steps = 130;
+
+		for (int i = 0; i < steps; i++)
+		{
+			SDL_RenderClear(renderer);
+
+			angle += rotation;
+			rotation += 0.09;
+
+			----dst.y;
+			++++++++dst.h;
+			----dst.x;
+			++++++++dst.w;
+			
+			SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle, NULL, SDL_FLIP_NONE);
+
+			SDL_RenderPresent(renderer);
+
+			this_thread::sleep_for(chrono::milliseconds(time_pause));
+			if (time_pause  > 10)
+				--time_pause;
+		}
+		
+		steps = 85;
+		opacity = 0;
+
+		SDL_Surface* Fog = NULL;
+		SDL_Texture* white_background = NULL;
+
+		Fog = SDL_CreateRGBSurface(0, width, height, 32, 0, 0, 0, 0);
+
+		white_background = SDL_CreateTextureFromSurface(renderer, Fog);
+
+		SDL_SetTextureBlendMode(white_background, SDL_BLENDMODE_BLEND);
+
+		for (int i = 0; i < steps; i++)
+		{
+			SDL_RenderClear(renderer);
+
+			angle += rotation;
+			rotation += 0.13;
+
+			----dst.y;
+			++++++++dst.h;
+			----dst.x;
+			++++++++dst.w;
+						
+			if (opacity < 255)
+			SDL_SetTextureAlphaMod(white_background, ++++++opacity);
+			//cout << opacity << " ";
+			
+			SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle, NULL, SDL_FLIP_NONE);
+			SDL_RenderCopyEx(renderer, white_background, NULL, NULL, NULL, NULL, SDL_FLIP_NONE);
+
+			SDL_RenderPresent(renderer);
+
+			this_thread::sleep_for(chrono::milliseconds(time_pause));
+		}		
 	}
 }
 
@@ -363,7 +461,7 @@ int main(int argc, char * argv[]) {
 	previous_figure = 0;
 
 	bool start = false;
-	thread Menu(Menu, ref(start), ref(renderer), color, active);
+	thread Menu(Menu, ref(start), ref(renderer), color, active, ref(window));
 	
 	while (!start)
 	{
@@ -397,9 +495,8 @@ int main(int argc, char * argv[]) {
 	Generate_New_Figure(color, active);
 		
 	thread th2(The_Game, ref(loss), renderer, ref(color), ref(active));
-	th2.detach();
-	
-	//cout << "Event tracker will started";
+	th2.detach();		
+
 	while (!loss) {
 //		cout << "chityy";
 		SDL_Event event;
