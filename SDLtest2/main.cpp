@@ -113,26 +113,11 @@ void Render(int x, int y, SDL_Texture *image, SDL_Renderer *renderer, SDL_Rect *
 }
 void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, SDL_Renderer *renderer) {
 	
-	if (*(figure + 0))
-		Render(x, y, block, renderer, &color_of_figure);
-	if (*(figure + 1))
-		Render(x, y + CELL_SIZE, block, renderer, &color_of_figure);
-	if (*(figure + 2))
-		Render(x, y + 2 * CELL_SIZE, block, renderer, &color_of_figure);
-	if (*(figure + 3))
-		Render(x + CELL_SIZE, y, block, renderer, &color_of_figure);
-	if (*(figure + 4))
-		Render(x + CELL_SIZE, y + CELL_SIZE, block, renderer, &color_of_figure);
-	if (*(figure + 5))
-		Render(x + CELL_SIZE, y + 2 * CELL_SIZE, block, renderer, &color_of_figure);
-	if (*(figure + 6))
-		Render(x + 2 * CELL_SIZE, y + 2 * CELL_SIZE, block, renderer, &color_of_figure);
-	if (*(figure + 7))
-		Render(x + 3 * CELL_SIZE, y + 2 * CELL_SIZE, block, renderer, &color_of_figure);
-	if (*(figure + 8))
-		Render(x + 2 * CELL_SIZE, y + CELL_SIZE, block, renderer, &color_of_figure);
-	if (*(figure + 9))
-		Render(x, y - 1 * CELL_SIZE, block, renderer, &color_of_figure);
+	int arrayLOL[10][2] = { { 0, 0 }, { 0, 1 }, { 0, 2 }, { 1, 0 }, { 1, 1 }, { 1, 2 }, { 2, 2 }, { 3, 2 }, { 2, 1 }, { 0, -1 } };
+	
+	for (int i = 0; i < 10; i++)
+		if (*(figure + i))
+			Render(x + arrayLOL[i][0] * CELL_SIZE, y + arrayLOL[i][1] * CELL_SIZE, block, renderer, &color_of_figure);
 	
 }
 void Rewrite_of_shadow_cells(Figure active, int x_pos_of_figure, int y_pos_of_figure, SDL_Rect color) {

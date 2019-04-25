@@ -260,5 +260,6 @@ paket-files/
 __pycache__/
 *.pyc
 
-# Картиночки
+# Pictures
 types_of_figures.jpg
+Squares.bmp
