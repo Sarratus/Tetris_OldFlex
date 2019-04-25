@@ -2,17 +2,12 @@
 #include <iterator>
 #include <iostream>
 #include <SDL.h>
+#include <SDL_ttf.h>
 #include <thread>
 #include <chrono>
 #include <random>
-#include <atomic>
-#include <SDL_ttf.h>
-
-//#include <ctime>
 
 using namespace std;
-
-//time_t curr_time;
 
 const unsigned int width = 500;
 const unsigned int height = 1000;
@@ -308,7 +303,7 @@ void Menu(bool &start, SDL_Renderer *renderer, SDL_Rect color, Figure active) {
 	}
 	if (start)
 	{		
-		/*while (true)
+		/*for (int i = 0; i < length; i++)
 		{
 
 		}
