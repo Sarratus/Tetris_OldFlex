@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <thread>
 #include <chrono>
-//#include <mutex>
+#include <mutex>
 #include "Var.h"
 
 
@@ -19,24 +19,100 @@ void Menu(bool& start, SDL_Renderer* renderer, SDL_Rect color, Figure active, SD
 	dst2.h = 256;		dst2.w = 256;
 	dst2.x = 20 - dst2.w/2;	dst2.y = 820;
 
-	SDL_Color White = { 150, 200, 255 };
-	SDL_Texture* message = nullptr;
+	SDL_Rect dst3;
+	dst3.h = 500;		dst3.w = 500;
+	dst3.x = 0;	dst3.y = -230;
+
+	SDL_Rect dst4;
+	dst4 = dst3;
+	dst4.y = dst3.y+500;
+
+	SDL_Rect dst5;
+	dst5 = dst3;
+	dst5.y = dst3.y+500+500;
 	
-	message = Text_Texture("Press Enter to start", renderer, White);
+	SDL_Color White = { 215, 215, 215 };
+	SDL_Color Black = { 20, 20, 22 };
+	SDL_Color Gray = { 90, 90, 91 };
+
+	SDL_Texture* message = nullptr,* message_o = nullptr,* theme_message = nullptr,* theme_message_o = nullptr;
 	
+	message = Text_Texture("press ENTER to start", renderer, White, false, 0);
+	message_o = Text_Texture("press ENTER to start", renderer, Black, false, 0);
+
+	theme_message = Text_Texture("1 - color theme     2 - dark theme", renderer, White, false, 0);
+	theme_message_o = Text_Texture("1 - color theme     2 - dark theme", renderer, Black, false, 0);
+
 	SDL_Rect Message_rect; 
-	Message_rect.w = 390;
-	Message_rect.h = 26;
-	Message_rect.x = SCREEN_WIDTH / 2 - Message_rect.w / 2 + 3;
+	Message_rect.w = 450;
+	Message_rect.h = 30;
+	Message_rect.x = SCREEN_WIDTH / 2 - Message_rect.w / 2 + 2;
 	Message_rect.y = 700; 
 
-	while (!start) {		
+	SDL_Rect Message_rect_2;
+	Message_rect_2.w = 340;
+	Message_rect_2.h = 15;
+	Message_rect_2.x = SCREEN_WIDTH / 2 - Message_rect_2.w / 2;
+	Message_rect_2.y = 775;
+
+
+	SDL_Rect dst6;
+	dst6.h = 160;	dst6.w = 1000;
+	dst6.x = -250;	dst6.y = 665;
+
+	while (!start || angle2 < 10) {		
 				
 		SDL_RenderClear(renderer);
 		
-		SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle++, NULL, SDL_FLIP_NONE);
-		SDL_RenderCopyEx(renderer, block, &srcGREEN, &dst2, ++++++angle2, NULL, SDL_FLIP_NONE);
-		SDL_RenderCopyEx(renderer, message, NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);		
+		SDL_RenderCopy(renderer, block, &srcGREEN, &dst3);
+		SDL_RenderCopy(renderer, block, &srcBLUE, &dst4);
+		SDL_RenderCopy(renderer, block, &srcMAGNT, &dst5);
+
+		//SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, ++angle, NULL, SDL_FLIP_NONE);
+		//SDL_RenderCopyEx(renderer, block, &srcGREEN, &dst2, ++++++angle2, NULL, SDL_FLIP_NONE);
+				
+		SDL_RenderCopy(renderer, background, &srcMAGNT, &dst6);
+		
+		if (block != block_color)
+		{
+			SDL_RenderCopyEx(renderer, message, NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
+			SDL_RenderCopyEx(renderer, theme_message, NULL, &Message_rect_2, NULL, NULL, SDL_FLIP_NONE);
+		}
+		else
+		{
+			SDL_RenderCopyEx(renderer, message_o, NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
+			SDL_RenderCopyEx(renderer, theme_message_o, NULL, &Message_rect_2, NULL, NULL, SDL_FLIP_NONE);
+		}
+		
+		
+		
+		if (dst3.y >= 1000)
+		{
+			dst3.y -= 1500;
+		}
+		else
+		{
+			dst3.y += 3;
+		}
+		
+		if (dst4.y >= 1000)
+		{
+			dst4.y -= 1500;
+		}
+		else
+		{
+			dst4.y += 3;
+		}
+		
+		if (dst5.y >= 1000)
+		{
+			dst5.y -= 1500;
+		}
+		else
+		{
+			dst5.y += 3;
+		}
+
 		SDL_RenderPresent(renderer);
 
 		dst.h += change;
@@ -47,25 +123,94 @@ void Menu(bool& start, SDL_Renderer* renderer, SDL_Rect color, Figure active, SD
 		if (dst.h == 600)
 			change *= -1;			
 
-		this_thread::sleep_for(chrono::milliseconds(40));
+		this_thread::sleep_for(chrono::milliseconds(25));
+
+		if (start)
+			angle2 += 1;
 	}
 	if (start)
 	{		
 		unsigned int opacity = 255, time_pause = 40, steps = 130;
 		double rotation = 1;
 
+		int accel = 2;
+		dst.x = 500;
+
 		for (int i = 0; i < steps; i++)
-		{
+		{			
 			SDL_RenderClear(renderer);
 
-			if (opacity > 1)
-				SDL_SetTextureAlphaMod(message, --(--opacity));			
+			if (opacity > 1) {
 
+				if (block != block_color) {
+
+					SDL_SetTextureAlphaMod(message, ----opacity);
+					//SDL_SetTextureAlphaMod(theme_message, opacity);
+				}
+				else
+				{
+					SDL_SetTextureAlphaMod(message_o, ----opacity);
+					//SDL_SetTextureAlphaMod(theme_message_o, opacity);					
+				}
+			}
+				
 			angle += rotation;
 			rotation += 0.03;
 
+			----dst2.x;
+
+			SDL_RenderCopy(renderer, block, &srcGREEN, &dst3);
+			SDL_RenderCopy(renderer, block, &srcBLUE, &dst4);
+			SDL_RenderCopy(renderer, block, &srcMAGNT, &dst5);
+
+			SDL_RenderCopy(renderer, background, &srcMAGNT, &dst6);
+
 			SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle, NULL, SDL_FLIP_NONE);
-			SDL_RenderCopyEx(renderer, message, NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
+			//SDL_RenderCopyEx(renderer, block, &srcGREEN, &dst2, ++++++angle2, NULL, SDL_FLIP_NONE);
+			
+			if (block != block_color) {
+
+				SDL_RenderCopyEx(renderer, message, NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
+			}
+			else
+			{
+				SDL_RenderCopyEx(renderer, message_o, NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
+			}	
+
+			dst.x -= 3;
+			dst6.w -= accel;
+
+			if (dst3.y > 0 && dst3.y < 500) {
+				dst3.x += accel;
+			}
+			else
+			{
+				dst3.x -= accel;
+			}
+			
+			if (dst4.y > 0 && dst4.y < 500) {
+				dst4.x += accel;
+			}
+			else
+			{
+				dst4.x -= accel;
+			}
+
+			if (dst5.y > 0 && dst5.y < 500) {
+				dst5.x += accel;
+			}
+			else
+			{
+				dst5.x -= accel;
+			}
+
+			accel += 1;
+
+			/*if (block == block_color) {
+
+				SDL_RenderCopyEx(renderer, theme_message, NULL, &Message_rect_2, NULL, NULL, SDL_FLIP_NONE);
+				SDL_RenderCopyEx(renderer, theme_message_o, NULL, &Message_rect_2, NULL, NULL, SDL_FLIP_NONE);
+			}		*/	
 			
 			SDL_RenderPresent(renderer);
 
@@ -74,6 +219,7 @@ void Menu(bool& start, SDL_Renderer* renderer, SDL_Rect color, Figure active, SD
 				--time_pause;
 		}
 		steps = 130;
+			
 		
 		int del_x = ((dst.x + dst.w / 2) - (SCREEN_WIDTH / 2)) / steps;
 		int del_y = ((dst.y + dst.h / 2) - (SCREEN_HEIGHT / 2)) / steps;
@@ -177,11 +323,11 @@ int main(int argc, char * argv[]) {
 	Color_Init();
 
 	shadow_sells = new Shadow_Cell*[WIDTH_OF_PLAYING_FIELD];
-
 	for (int i1 = 0; i1 < WIDTH_OF_PLAYING_FIELD; i1++)
 	{
 		*(shadow_sells + i1) = new Shadow_Cell[HEIGHT_OF_PLAYING_FIELD];
-	}		
+	}	
+
 	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
 		//cout << "SDL initialization failed. SDL Error: " << SDL_GetError();
 	}
@@ -200,13 +346,19 @@ int main(int argc, char * argv[]) {
 		return 1;
 	}
 	
-	block = Image_Load("Squares.bmp", renderer);
-		
-	Figure active;
-	
-	SDL_Rect color = srcYELL;
-	figure_color_next = 1;
+	block_color = Image_Load("Squares3.bmp", renderer);
+	block_dark = Image_Load("Squares2.bmp", renderer);
 
+	block = block_color;
+	
+	background_color = Image_Load("backgroung3.bmp", renderer);
+	background_dark = Image_Load("backgroung2.bmp", renderer);
+
+	background = background_color;
+
+	Figure active;	
+	SDL_Rect color = srcYELL;
+	
 	bool start = false;
 	thread Menu(Menu, ref(start), ref(renderer), color, active, ref(window));
 	
@@ -222,16 +374,28 @@ int main(int argc, char * argv[]) {
 						case SDLK_RETURN: {
 						start = true;
 						break;
-					}				
+						}
+
+						case SDLK_1: {
+							block = block_color;
+							background = background_color;
+							break;
+						}
+
+						case SDLK_2: {
+							block = block_dark;
+							background = background_dark;
+							break;
+						}							
 				}
 			}
 		}
-		this_thread::sleep_for(chrono::milliseconds(100));
+		this_thread::sleep_for(chrono::milliseconds(50));
 	}
 
 	Menu.join();
 		
-	Generate_New_Figure(color, active);
+	Generate_New_Figure(color, active, 1);
 	
 	bool loss = false;
 
@@ -239,8 +403,15 @@ int main(int argc, char * argv[]) {
 	th2.detach();
 
 	while (!loss) {
-//		cout << "chityy";
+		//cout << "chityy";
 		SDL_Event event;
+		
+		while (process_pause) {
+
+			SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
+			this_thread::sleep_for(chrono::milliseconds(20));
+		}
+			
 		while (SDL_PollEvent(&event) && !process_pause) {
 			
 			switch (event.type) {
@@ -258,58 +429,68 @@ int main(int argc, char * argv[]) {
 					while (!on_floor && !loss && flag.x == color.x) {
 
 						bool flagB = true;
-												
-						if (y_pos_of_figure >= CELL_SIZE * 17) {
 
-							on_floor = true;
-							
-							Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
-							active = *(figures + 7);
+						unsigned short int arrayKEK[4] = { 2, 5, 6, 7 };
 
-							flagB = false;
+						for (auto i = 0; i < 4; i++)
+							if (*(active.figure + arrayKEK[i]))
+								if (y_pos_of_figure >= CELL_SIZE * 17) {
+									on_floor = true;
 
-						}
-						else {
+									Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
+									active = *(figures + 7);
 
-							int arrayLOL[10][2] = { { 0, 1 }, { 0, 2 }, { 0, 3 }, { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 3 }, { 3, 3 }, { 2, 2 }, { 0, 0 } };
+									flagB = false;
 
-							for (int i = 0; i < 10; i++)
-								if (*(active.figure + i))
-									if (shadow_sells[x_pos_of_figure / CELL_SIZE + arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) { flagB = false; on_floor = true;  }
-
-							if (!flagB) {
-								if (y_pos_of_figure == 0) {
-
-									loss = true;
 								}
+								else {
 
-								Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
-								active = *(figures + 7);
-							}
-						}
+									int arrayLOL[10][2] = { { 0, 1 }, { 0, 2 }, { 0, 3 }, { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 3 }, { 3, 3 }, { 2, 2 }, { 0, 0 } };
+
+									for (int i = 0; i < 10; i++)
+										if (*(active.figure + i))
+											if (shadow_sells[x_pos_of_figure / CELL_SIZE + arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) { flagB = false; on_floor = true; }
+
+									if (!flagB) {
+										if (y_pos_of_figure == 0) {
+
+											loss = true;
+										}
+
+										Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
+										active = *(figures + 7);
+									}
+								}
 
 						if (!flagB && !loss) {
 
 							Delete_line(renderer);
 
 							Generate_New_Figure(color, active);
-
+														
 							SDL_RenderClear(renderer);
+							SDL_RenderCopy(renderer, background, NULL, NULL);
 							Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 							Shadow_Render(renderer);
+
 							SDL_RenderPresent(renderer);
-						}						
-						
+						}
+
 						if (flagB)
 						{
 							y_pos_of_figure += CELL_SIZE;
 
+							render.lock();
+
 							SDL_RenderClear(renderer);
 
+							SDL_RenderCopy(renderer, background, NULL, NULL);
 							Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 							Shadow_Render(renderer);
-
+							
 							SDL_RenderPresent(renderer);
+
+							render.unlock();
 
 							this_thread::sleep_for(chrono::milliseconds(inert));
 							if (inert >= 12) {
@@ -321,13 +502,41 @@ int main(int argc, char * argv[]) {
 								 this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 10));
 								 break;
 				case SDLK_p: {
+					
+					SDL_Color white;
+
+					if (block = block_color) {
+						white = { 255, 255, 255 };
+					}
+					else
+					{
+						white = { 30, 30, 31 };
+					}					
+					
+					SDL_Rect Message_rect;
+					Message_rect.w = 250;
+					Message_rect.h = 55;
+					Message_rect.x = SCREEN_WIDTH / 2 - Message_rect.w / 2 + 3;
+					Message_rect.y = 300;
+
+					SDL_RenderClear(renderer);
+
+					SDL_RenderCopy(renderer, background, NULL, NULL);
+					Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
+					Shadow_Render(renderer);
+
+					SDL_RenderCopyEx(renderer, Text_Texture("pause", renderer, white, false, 0), NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
+
+					SDL_RenderPresent(renderer);
 
 					pause = true;
 				}
 							 break;
 
+				case SDLK_a: {
 				case SDLK_LEFT: {
-					cout << "Left arrow pressed";
+
+					//cout << "Left arrow pressed";
 					bool flag = true;
 
 					int arrayLOL[10][2] = {
@@ -351,13 +560,19 @@ int main(int argc, char * argv[]) {
 					if (flag) {
 						x_pos_of_figure -= CELL_SIZE;
 						SDL_RenderClear(renderer);
+						
+						SDL_RenderCopy(renderer, background, NULL, NULL);
 						Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 						Shadow_Render(renderer);
+						
 						SDL_RenderPresent(renderer);
 					}
 					flag = true;
-				}
-								break;
+
+					break;
+				}}								
+
+				case SDLK_d: {
 				case SDLK_RIGHT: {
 					if (x_pos_of_figure + active.figure_width == SCREEN_WIDTH) {}
 
@@ -384,14 +599,21 @@ int main(int argc, char * argv[]) {
 					}
 					if (flagR) {
 						x_pos_of_figure += CELL_SIZE;
+						
 						SDL_RenderClear(renderer);
+						
+						SDL_RenderCopy(renderer, background, NULL, NULL);
 						Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 						Shadow_Render(renderer);
+						
 						SDL_RenderPresent(renderer);
 					}
 					flagR = true;
-				}
-								 break;
+
+					break;
+				}}
+								 
+				case SDLK_w: {
 				case SDLK_x: {
 				case SDLK_UP: {
 					bool is_updated = false;
@@ -408,52 +630,64 @@ int main(int argc, char * argv[]) {
 
 					if (is_updated) {
 						SDL_RenderClear(renderer);
+						
+						SDL_RenderCopy(renderer, background, NULL, NULL);
 						Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 						Shadow_Render(renderer);
+						
 						SDL_RenderPresent(renderer);
 					}
 					this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 8));
 					break;
-				}}
+				}}}
+				
+				case SDLK_s: {
 				case SDLK_DOWN: {
 
 					bool flagB = true;
-					if (y_pos_of_figure >= CELL_SIZE * 17) {
+					unsigned short int arrayKEK[4] = { 2, 5, 6, 7 };
 
-						Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
-						active = *(figures + 7);
+					for (auto i = 0; i < 4; i++)
+						if (*(active.figure + arrayKEK[i]))
+							if (y_pos_of_figure >= CELL_SIZE * 17) {
 
-						flagB = false;
-												
-					}
-					else {
+								Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
+								active = *(figures + 7);
 
-						int arrayLOL[10][2] = { { 0, 1 }, { 0, 2 }, { 0, 3 }, { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 3 }, { 3, 3 }, { 2, 2 }, { 0, 0 } };
+								flagB = false;
 
-						for (int i = 0; i < 10; i++)
-							if (*(active.figure + i))
-								if (shadow_sells[x_pos_of_figure / CELL_SIZE + arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) { flagB = false; }
+							}
+							else {
 
-						if (!flagB) {
-							if (y_pos_of_figure == 0) {
+								int arrayLOL[10][2] = { { 0, 1 }, { 0, 2 }, { 0, 3 }, { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 3 }, { 3, 3 }, { 2, 2 }, { 0, 0 } };
 
-								loss = true;
+								for (int i = 0; i < 10; i++)
+									if (*(active.figure + i))
+										if (shadow_sells[x_pos_of_figure / CELL_SIZE + arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) { flagB = false; }
+
+								if (!flagB) {
+									if (y_pos_of_figure == 0) {
+
+										loss = true;
+									}
+
+									Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
+									active = *(figures + 7);
+								}
 							}
 
-							Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
-							active = *(figures + 7);													
-						}
-					}
-
 					if (!flagB && !loss) {
-						
+
 						Delete_line(renderer);
 
 						Generate_New_Figure(color, active);
 
 						SDL_RenderClear(renderer);
+						
+						SDL_RenderCopy(renderer, background, NULL, NULL);
 						Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 						Shadow_Render(renderer);
+						
 						SDL_RenderPresent(renderer);
 					}
 
@@ -462,15 +696,16 @@ int main(int argc, char * argv[]) {
 						y_pos_of_figure += CELL_SIZE;
 
 						SDL_RenderClear(renderer);
-
+						
+						SDL_RenderCopy(renderer, background, NULL, NULL);
 						Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 						Shadow_Render(renderer);
 
 						SDL_RenderPresent(renderer);
 					}
-				}
 
-						break;
+					break;
+				}}						
 				}
 			}
 			else
@@ -494,5 +729,10 @@ int main(int argc, char * argv[]) {
 		cout << "You are loss. NOOB! (Hahahahahahahah)";
 		this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME * 20));
 	}
+	else
+	{
+		cout << endl << endl << "CRTITCAL ERROR!!!" << endl;
+	}
+	cin >> x_pos_of_figure;
 	return 0;	
 }

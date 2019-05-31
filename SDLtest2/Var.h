@@ -8,6 +8,9 @@
 #include <string>
 #endif // !string
 
+#ifndef mutex
+#include <mutex>
+#endif // !mutex
 
 using namespace std;
 
@@ -31,13 +34,16 @@ extern int figure_color_next, figure_color_prev;
 
 extern SDL_Rect srcRED, srcYELL, srcBLUE, srcGREEN, srcMAGNT, srcCYAN;
 
-extern SDL_Texture* block;
+extern SDL_Texture *block, * block_color, * block_dark;
+extern SDL_Texture* background,* background_color,* background_dark;
 
 struct Figure { bool figure[10] = { 0,0,0,0,0,0,0,0,0,0 }; int figure_width = 0; };
 extern Figure figures[20];
 
 struct Shadow_Cell { bool square = false; SDL_Rect color = srcBLUE; };
 extern Shadow_Cell** shadow_sells;
+
+extern mutex render;
 
 //struct Figure2 { bool** active_sells; };
 //extern Figure2 figures2[NUMBER_OF_FIGURES];
@@ -56,11 +62,12 @@ SDL_Texture* Image_Load(string image, SDL_Renderer* renderer);
 
 bool The_Game(bool& loss, SDL_Renderer* renderer, SDL_Rect& color, Figure& active);
 
-SDL_Texture* Text_Texture(const char* Text, SDL_Renderer* renderer, SDL_Color Color);
+SDL_Texture* Text_Texture(const char* Text, SDL_Renderer* renderer, SDL_Color Color, bool, int);
 
 void Rewrite_of_shadow_cells(Figure active, int x_pos_of_figure, int y_pos_of_figure, SDL_Rect color);
 
 void Generate_New_Figure(SDL_Rect&, Figure&);
+void Generate_New_Figure(SDL_Rect&, Figure&, int);
 
 int Generate_Random_Number(int, int);
 

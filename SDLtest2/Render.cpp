@@ -28,7 +28,7 @@ void Render(int x, int y, SDL_Texture* image, SDL_Renderer* renderer, SDL_Rect* 
 	SDL_RenderCopy(renderer, image, srcrect, &pos);
 }
 void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, SDL_Renderer* renderer) {
-
+	
 	int arrayLOL[10][2] = { { 0, 0 }, { 0, 1 }, { 0, 2 }, { 1, 0 }, { 1, 1 }, { 1, 2 }, { 2, 2 }, { 3, 2 }, { 2, 1 }, { 0, -1 } };
 
 	for (int i = 0; i < 10; i++)
@@ -45,12 +45,23 @@ void Shadow_Render(SDL_Renderer* renderer) {
 			}
 		}
 }
-SDL_Texture* Text_Texture(const char* Text, SDL_Renderer* renderer, SDL_Color Color) {
+SDL_Texture* Text_Texture(const char* Text, SDL_Renderer* renderer, SDL_Color Color, bool is_outline, int outline_size) {
 
 	TTF_Init();
 
 		TTF_Font* Sans = nullptr;
-		Sans = TTF_OpenFont("C:\\Users\\User\\source\\repos\\SDLtest2\\Debug\\Pixelnaya_Zalupa.ttf", 24);
+		
+		if (!is_outline) {
+
+			Sans = TTF_OpenFont("C:\\Users\\User\\source\\repos\\SDLtest2\\Debug\\Pixelnaya_Zalupa.ttf", 26);
+		}
+		else
+		{
+			Sans = TTF_OpenFont("C:\\Users\\User\\source\\repos\\SDLtest2\\Debug\\Pixelnaya_Zalupa.ttf", 26+outline_size);
+		}		
+		
+		if(is_outline)
+			TTF_SetFontOutline(Sans, outline_size);
 
 		SDL_Surface* message_surface = nullptr;
 		SDL_Texture* message = nullptr;

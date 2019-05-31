@@ -5,22 +5,49 @@
 #include "Var.h"
 
 int number_of_figure_next, previous_figure = 0;
+int figure_color_next, figure_color_prev;
 
 void Delete_line(SDL_Renderer* renderer) {
 
 	process_pause = true;
 	
+	bool a = false;
+
 	for (int i = 0; i < HEIGHT_OF_PLAYING_FIELD; i++)
-		if (shadow_sells[0][i].square && shadow_sells[1][i].square && shadow_sells[2][i].square && shadow_sells[3][i].square && shadow_sells[4][i].square && shadow_sells[5][i].square && shadow_sells[6][i].square && shadow_sells[7][i].square && shadow_sells[8][i].square && shadow_sells[9][i].square) {
+		if (
+			shadow_sells[0][i].square &&
+			shadow_sells[1][i].square &&
+			shadow_sells[2][i].square &&
+			shadow_sells[3][i].square &&
+			shadow_sells[4][i].square &&
+			shadow_sells[5][i].square &&
+			shadow_sells[6][i].square &&
+			shadow_sells[7][i].square &&
+			shadow_sells[8][i].square &&
+			shadow_sells[9][i].square
+		) {
+								
+			if (!a)
+				this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 10));
+			
+			a = true;
 
 			//cout << "\nLine cheked!\n";
 			for (int j = 0; j < WIDTH_OF_PLAYING_FIELD; j++)
 			{
 				this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 20));
+				
+				render.lock();
+
 				SDL_RenderClear(renderer);
+				
+				SDL_RenderCopy(renderer, background, NULL, NULL);
 				shadow_sells[j][i].square = false;
 				Shadow_Render(renderer);
+				
 				SDL_RenderPresent(renderer);
+
+				render.unlock();
 			}
 			//cout << "\nLine deleted!\n";
 			SDL_RenderClear(renderer);
@@ -37,9 +64,17 @@ void Delete_line(SDL_Renderer* renderer) {
 				}
 
 			this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 8));
+			
+			render.lock();
+
+			SDL_RenderCopy(renderer, background, NULL, NULL);
 			Shadow_Render(renderer);
 			SDL_RenderPresent(renderer);
+
+			render.unlock();
 		}
+
+	this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 4));
 
 	process_pause = false;
 }
@@ -57,6 +92,66 @@ int Generate_Random_Number(int a, int b) {
 	mt19937 rng(rd());
 	uniform_int_distribution<int> rand(a, b);
 	return rand(rd);
+}
+
+void Generate_New_Figure(SDL_Rect& color, Figure& active, int a) {
+
+	cout << "first figure! =)";
+
+	number_of_figure_next = Generate_Random_Number(0, 6);
+
+	active = *(figures + number_of_figure_next);
+
+	previous_figure = number_of_figure_next;
+
+regen:
+	number_of_figure_next = Generate_Random_Number(0, 6);
+	if (number_of_figure_next == previous_figure)
+		goto regen;
+
+	figure_color_next = Generate_Random_Number(0, 5);
+	
+	switch (figure_color_next)
+	{
+	case(0):
+		color = srcRED;
+		cout << "\nRed";
+		break;
+	case(1):
+		color = srcYELL;
+		cout << "\nYellow";
+		break;
+	case(2):
+		color = srcBLUE;
+		cout << "\nBlue";
+		break;
+	case(3):
+		color = srcGREEN;
+		cout << "\nGreen";
+		break;
+	case(4):
+		color = srcMAGNT;
+		cout << "\nMagenta";
+		break;
+	case(5):
+		color = srcCYAN;
+		cout << "\nCyan";
+		break;
+	default:
+		color = srcYELL;
+		cout << "\nYellow";
+		break;
+	}
+
+	figure_color_prev = figure_color_next;
+
+REcolor:
+	figure_color_next = Generate_Random_Number(0, 5);
+	if (figure_color_next == figure_color_prev)
+		goto REcolor;
+
+	x_pos_of_figure = 150;
+	y_pos_of_figure = 0;
 }
 
 void Generate_New_Figure(SDL_Rect& color, Figure& active) {
@@ -133,7 +228,12 @@ bool The_Game(bool& loss, SDL_Renderer* renderer, SDL_Rect& color, Figure& activ
 
 	while (!loss) {
 		
-		cout << "y_pos = " << y_pos_of_figure;
+		if (process_pause) 
+			this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 10));
+
+		if (!process_pause) {
+		
+		//cout << "y_pos = " << y_pos_of_figure;
 
 		SDL_RenderClear(renderer);																// RENDER CLEAR
 
@@ -141,42 +241,31 @@ bool The_Game(bool& loss, SDL_Renderer* renderer, SDL_Rect& color, Figure& activ
 
 		if (pause)
 		{
-			SDL_RenderClear(renderer);
-			Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
-			Shadow_Render(renderer);
-
-			SDL_Color white = { 255, 255, 255 };
-			SDL_Rect Message_rect;
-			Message_rect.w = 250;
-			Message_rect.h = 55;
-			Message_rect.x = SCREEN_WIDTH / 2 - Message_rect.w / 2 + 3;
-			Message_rect.y = 300;
-
-			SDL_RenderCopyEx(renderer, Text_Texture("pause", renderer, white), NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
-
-			SDL_RenderPresent(renderer);
-
+			
 			while (pause) {
 
 				if (!pause)
 					break;
 
-				this_thread::sleep_for(chrono::milliseconds(300));
+				this_thread::sleep_for(chrono::milliseconds(50));
 			}
 		}
 
 
 		bool flagB = true;
 
-		if (y_pos_of_figure >= CELL_SIZE * 17) {
-			
-			Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
-			active = *(figures + 7);
+		unsigned short int arrayKEK[4] = { 2, 5, 6, 7 };
 
-			flagB = false;
+		for (auto i = 0; i < 4; i++)
+			if (*(active.figure + arrayKEK[i]))
+				if (y_pos_of_figure >= CELL_SIZE * 17) {
+					
+					Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
+					active = *(figures + 7);
 
-		}
-		else {
+					flagB = false;
+
+				} else {
 
 			int arrayLOL[10][2] = { { 0, 1 }, { 0, 2 }, { 0, 3 }, { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 3 }, { 3, 3 }, { 2, 2 }, { 0, 0 } };
 
@@ -185,7 +274,7 @@ bool The_Game(bool& loss, SDL_Renderer* renderer, SDL_Rect& color, Figure& activ
 					if (shadow_sells[x_pos_of_figure / CELL_SIZE + arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) { flagB = false; }
 
 			if (!flagB) {
-				if (y_pos_of_figure == 0) {
+				if (y_pos_of_figure == 50) {
 
 					loss = true;
 				}
@@ -201,21 +290,29 @@ bool The_Game(bool& loss, SDL_Renderer* renderer, SDL_Rect& color, Figure& activ
 
 			Generate_New_Figure(color, active);
 
+			SDL_RenderCopy(renderer, background, NULL, NULL);
 			SDL_RenderClear(renderer);
 			Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 			Shadow_Render(renderer);
 			SDL_RenderPresent(renderer);
 		}
 
-		//		cout << "\nPADAU! -\t";
-		SDL_RenderClear(renderer);
+		//		cout << "\nPADAU! -\t";		
 
-		if (!process_pause)
+			SDL_RenderClear(renderer);
+
 			y_pos_of_figure += CELL_SIZE;
 
-		Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
-		Shadow_Render(renderer);
-		SDL_RenderPresent(renderer);															// RENDER PRESENT
+			SDL_RenderCopy(renderer, background, NULL, NULL);
+			Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
+			Shadow_Render(renderer);
+			
+			render.lock();
+			
+			SDL_RenderPresent(renderer);															// RENDER PRESENT
+
+			render.unlock();
+		}		
 	}
 	return 0;
 }
