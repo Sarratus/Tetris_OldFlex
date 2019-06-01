@@ -7,7 +7,7 @@
 #include "Var.h"
 
 
-void Menu(bool& start, SDL_Renderer* renderer, SDL_Rect color, Figure active, SDL_Window* window) {
+void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Rect color, Figure active, SDL_Window* window) {
 
 	double angle = 0, angle2 = 0;
 	short int change = 2;
@@ -128,9 +128,11 @@ void Menu(bool& start, SDL_Renderer* renderer, SDL_Rect color, Figure active, SD
 		if (start)
 			angle2 += 1;
 	}
+	std::cout << loss;
+	if (!loss)
 	if (start)
 	{		
-		unsigned int opacity = 255, time_pause = 40, steps = 130;
+		unsigned int opacity = 255, time_pause = 13, steps = 110;
 		double rotation = 1;
 
 		int accel = 2;
@@ -140,32 +142,37 @@ void Menu(bool& start, SDL_Renderer* renderer, SDL_Rect color, Figure active, SD
 		{			
 			SDL_RenderClear(renderer);
 
-			if (opacity > 1) {
+			if (opacity > 2) {
 
 				if (block != block_color) {
 
-					SDL_SetTextureAlphaMod(message, ----opacity);
+					SDL_SetTextureAlphaMod(message, ------opacity);
 					//SDL_SetTextureAlphaMod(theme_message, opacity);
 				}
 				else
 				{
-					SDL_SetTextureAlphaMod(message_o, ----opacity);
+					SDL_SetTextureAlphaMod(message_o, ------opacity);
 					//SDL_SetTextureAlphaMod(theme_message_o, opacity);					
 				}
 			}
 				
+			if (angle >= 360)
+				angle -= 360;
+
 			angle += rotation;
 			rotation += 0.03;
 
 			----dst2.x;
 
+			SDL_RenderCopy(renderer, background, NULL, NULL);
+			
 			SDL_RenderCopy(renderer, block, &srcGREEN, &dst3);
 			SDL_RenderCopy(renderer, block, &srcBLUE, &dst4);
 			SDL_RenderCopy(renderer, block, &srcMAGNT, &dst5);
 
 			SDL_RenderCopy(renderer, background, &srcMAGNT, &dst6);
 
-			SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle, NULL, SDL_FLIP_NONE);
+			//SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle, NULL, SDL_FLIP_NONE);
 			//SDL_RenderCopyEx(renderer, block, &srcGREEN, &dst2, ++++++angle2, NULL, SDL_FLIP_NONE);
 			
 			if (block != block_color) {
@@ -176,7 +183,7 @@ void Menu(bool& start, SDL_Renderer* renderer, SDL_Rect color, Figure active, SD
 			{
 				SDL_RenderCopyEx(renderer, message_o, NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
 			}	
-
+			
 			dst.x -= 3;
 			dst6.w -= accel;
 
@@ -214,101 +221,14 @@ void Menu(bool& start, SDL_Renderer* renderer, SDL_Rect color, Figure active, SD
 			
 			SDL_RenderPresent(renderer);
 
-			this_thread::sleep_for(chrono::milliseconds(time_pause));
-			if (time_pause > 16)
-				--time_pause;
-		}
-		steps = 130;
-			
-		
-		int del_x = ((dst.x + dst.w / 2) - (SCREEN_WIDTH / 2)) / steps;
-		int del_y = ((dst.y + dst.h / 2) - (SCREEN_HEIGHT / 2)) / steps;
-
-		cout << " " << dst.x << " " << SCREEN_WIDTH;
-		steps += 100;
-		
-		for (int i = 0; i < steps; i++)
-		{
-			//cout << "step" << del_x;
-			SDL_RenderClear(renderer);
-
-			angle += rotation;
-			rotation += 0.07;
-
-			if (dst.x + dst.w / 2 != SCREEN_WIDTH / 2)
-				--dst.x;
-			if (dst.y + dst.h / 2 != SCREEN_HEIGHT / 2)
-				++dst.y;
-
-			SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle, NULL, SDL_FLIP_NONE);
-		
-			SDL_RenderPresent(renderer);
-
-			this_thread::sleep_for(chrono::milliseconds(time_pause));
-		}	
-
-		steps = 130;
-
-		for (int i = 0; i < steps; i++)
-		{
-			SDL_RenderClear(renderer);
-
-			angle += rotation;
-			rotation += 0.09;
-
-			----dst.y;
-			++++++++dst.h;
-			----dst.x;
-			++++++++dst.w;
-			
-			SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle, NULL, SDL_FLIP_NONE);
-
-			SDL_RenderPresent(renderer);
-
-			this_thread::sleep_for(chrono::milliseconds(time_pause));
-			if (time_pause  > 10)
-				--time_pause;
-		}
-		
-		steps = 85;
-		opacity = 0;
-
-		SDL_Surface* Fog = NULL;
-		SDL_Texture* white_background = NULL;
-
-		Fog = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32, 0, 0, 0, 0);
-
-		white_background = SDL_CreateTextureFromSurface(renderer, Fog);
-
-		SDL_SetTextureBlendMode(white_background, SDL_BLENDMODE_BLEND);
-
-		for (int i = 0; i < steps; i++)
-		{
-			SDL_RenderClear(renderer);
-
-			angle += rotation;
-			rotation += 0.13;
-
-			----dst.y;
-			++++++++dst.h;
-			----dst.x;
-			++++++++dst.w;
-						
-			if (opacity < 255)
-			SDL_SetTextureAlphaMod(white_background, ++++++opacity);
-			//cout << opacity << " ";
-			
-			SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle, NULL, SDL_FLIP_NONE);
-			SDL_RenderCopyEx(renderer, white_background, NULL, NULL, NULL, NULL, SDL_FLIP_NONE);
-
-			SDL_RenderPresent(renderer);
-
-			this_thread::sleep_for(chrono::milliseconds(time_pause));
+			this_thread::sleep_for(chrono::milliseconds(time_pause));			
 		}		
 	}
 }
 
 int main(int argc, char * argv[]) {
+	
+	bool loss = false;
 	
 	*(figures + 0) = { { 1,1,1,1,0,0,0,0,0,0 }, {100} };	*(figures + 8) = { { 0,1,0,0,1,0,1,0,1,0 }, {150} };	*(figures + 9) = { { 0,0,1,1,1,1,0,0,0,0 }, {100} };	*(figures + 10) = { { 0,1,1,0,0,1,1,0,0,0 }, {150} };
 	*(figures + 1) = { { 0,1,1,1,1,0,0,0,0,0 }, {100} };	*(figures + 11) = { { 0,1,0,0,1,1,1,0,0,0 }, {150} };
@@ -360,13 +280,23 @@ int main(int argc, char * argv[]) {
 	SDL_Rect color = srcYELL;
 	
 	bool start = false;
-	thread Menu(Menu, ref(start), ref(renderer), color, active, ref(window));
+	thread Menu(Menu, ref(start), ref(loss), ref(renderer), color, active, ref(window));
 	
 	while (!start)
 	{
 		SDL_Event event1;
 		
 		while (SDL_PollEvent(&event1)) {
+			
+			if (event1.type == SDL_QUIT) {
+				loss = true;
+				start = true;
+				//Menu.~thread();
+				//return 0;
+				//cout << endl << "exit" << endl;
+			}
+				
+			
 			switch (event1.type) {
 			case SDL_KEYDOWN:
 				switch (event1.key.keysym.sym) {
@@ -394,13 +324,21 @@ int main(int argc, char * argv[]) {
 	}
 
 	Menu.join();
-		
-	Generate_New_Figure(color, active, 1);
 	
-	bool loss = false;
+	if (!loss) {
 
-	thread th2(The_Game, ref(loss), renderer, ref(color), ref(active));
-	th2.detach();
+		thread th2(The_Game, ref(loss), renderer, ref(color), ref(active));
+		
+		Generate_New_Figure(color, active, 1);
+
+		SDL_RenderClear(renderer);
+		SDL_RenderCopy(renderer, background, NULL, NULL);
+		Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
+		
+		SDL_RenderPresent(renderer);
+		
+		th2.detach();
+	}	
 
 	while (!loss) {
 		//cout << "chityy";
@@ -414,6 +352,9 @@ int main(int argc, char * argv[]) {
 			
 		while (SDL_PollEvent(&event) && !process_pause) {
 			
+			if (event.type == SDL_QUIT)
+				return 0;
+
 			switch (event.type) {
 			case SDL_KEYDOWN:
 			
@@ -505,8 +446,8 @@ int main(int argc, char * argv[]) {
 					
 					SDL_Color white;
 
-					if (block = block_color) {
-						white = { 255, 255, 255 };
+					if (block != block_color) {
+						white = { 240, 240, 242 };
 					}
 					else
 					{
@@ -624,7 +565,7 @@ int main(int argc, char * argv[]) {
 						if (equal(begin(active.figure), end(active.figure), begin((figures + figures_changes[i][0])->figure))) {
 							active = *(figures + figures_changes[i][1]);
 							is_updated = true;
-							th2.~thread();
+							//th2.~thread();
 							break;
 						}
 
@@ -722,17 +663,21 @@ int main(int argc, char * argv[]) {
 		}
 		this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 20));
 	}
-	cout << "End of the cycle - " << loss;
+	
+	//cout << "End of the cycle - " << loss;
 		
-	if (loss)
-	{
-		cout << "You are loss. NOOB! (Hahahahahahahah)";
-		this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME * 20));
-	}
-	else
-	{
-		cout << endl << endl << "CRTITCAL ERROR!!!" << endl;
-	}
-	cin >> x_pos_of_figure;
+	//if (loss)
+	//{
+	//	cout << "You are loss. NOOB! (Hahahahahahahah)";
+	//	this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME * 20));
+	//}
+	//else
+	//{
+	//	//cout << endl << endl << "CRTITCAL ERROR!!!" << endl;
+	//}
+	
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+
 	return 0;	
 }

@@ -33,7 +33,8 @@ void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, S
 
 	for (int i = 0; i < 10; i++)
 		if (*(figure + i))
-			Render(x + arrayLOL[i][0] * CELL_SIZE, y + arrayLOL[i][1] * CELL_SIZE, block, renderer, &color_of_figure);
+			if (y + arrayLOL[i][1] * CELL_SIZE >= 0)
+				Render(x + arrayLOL[i][0] * CELL_SIZE, y + arrayLOL[i][1] * CELL_SIZE, block, renderer, &color_of_figure);
 
 }
 void Shadow_Render(SDL_Renderer* renderer) {
@@ -45,6 +46,7 @@ void Shadow_Render(SDL_Renderer* renderer) {
 			}
 		}
 }
+
 SDL_Texture* Text_Texture(const char* Text, SDL_Renderer* renderer, SDL_Color Color, bool is_outline, int outline_size) {
 
 	TTF_Init();

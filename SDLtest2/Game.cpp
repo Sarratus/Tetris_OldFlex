@@ -28,7 +28,7 @@ void Delete_line(SDL_Renderer* renderer) {
 		) {
 								
 			if (!a)
-				this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 10));
+				this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 12));
 			
 			a = true;
 
@@ -74,7 +74,7 @@ void Delete_line(SDL_Renderer* renderer) {
 			render.unlock();
 		}
 
-	this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 4));
+	this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 3));
 
 	process_pause = false;
 }
@@ -151,7 +151,7 @@ REcolor:
 		goto REcolor;
 
 	x_pos_of_figure = 150;
-	y_pos_of_figure = 0;
+	y_pos_of_figure = -100;
 }
 
 void Generate_New_Figure(SDL_Rect& color, Figure& active) {
@@ -223,7 +223,7 @@ void Rewrite_of_shadow_cells(Figure active, int x_pos_of_figure, int y_pos_of_fi
 
 bool The_Game(bool& loss, SDL_Renderer* renderer, SDL_Rect& color, Figure& active) {
 	
-	bool flagB = true;
+	bool is_falling = true;
 	int number_of_figure = 0, previous_figure = 0;
 
 	while (!loss) {
@@ -251,8 +251,7 @@ bool The_Game(bool& loss, SDL_Renderer* renderer, SDL_Rect& color, Figure& activ
 			}
 		}
 
-
-		bool flagB = true;
+		bool is_falling = true;
 
 		unsigned short int arrayKEK[4] = { 2, 5, 6, 7 };
 
@@ -263,7 +262,7 @@ bool The_Game(bool& loss, SDL_Renderer* renderer, SDL_Rect& color, Figure& activ
 					Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
 					active = *(figures + 7);
 
-					flagB = false;
+					is_falling = false;
 
 				} else {
 
@@ -271,9 +270,9 @@ bool The_Game(bool& loss, SDL_Renderer* renderer, SDL_Rect& color, Figure& activ
 
 			for (int i = 0; i < 10; i++)
 				if (*(active.figure + i))
-					if (shadow_sells[x_pos_of_figure / CELL_SIZE + arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) { flagB = false; }
+					if (shadow_sells[x_pos_of_figure / CELL_SIZE + arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) { is_falling = false; }
 
-			if (!flagB) {
+			if (!is_falling) {
 				if (y_pos_of_figure == 50) {
 
 					loss = true;
@@ -284,34 +283,38 @@ bool The_Game(bool& loss, SDL_Renderer* renderer, SDL_Rect& color, Figure& activ
 			}
 		}
 
-		if (!flagB && !loss) {
+		if (!is_falling && !loss) {
 
 			Delete_line(renderer);
 
 			Generate_New_Figure(color, active);
-
-			SDL_RenderCopy(renderer, background, NULL, NULL);
+						
 			SDL_RenderClear(renderer);
+			
+			SDL_RenderCopy(renderer, background, NULL, NULL);
 			Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 			Shadow_Render(renderer);
+
 			SDL_RenderPresent(renderer);
 		}
+		else
+		{
+			y_pos_of_figure += CELL_SIZE;
 
-		//		cout << "\nPADAU! -\t";		
+			//		cout << "\nPADAU! -\t";					
 
 			SDL_RenderClear(renderer);
-
-			y_pos_of_figure += CELL_SIZE;
 
 			SDL_RenderCopy(renderer, background, NULL, NULL);
 			Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 			Shadow_Render(renderer);
-			
+
 			render.lock();
-			
-			SDL_RenderPresent(renderer);															// RENDER PRESENT
+
+			SDL_RenderPresent(renderer);
 
 			render.unlock();
+		}		
 		}		
 	}
 	return 0;

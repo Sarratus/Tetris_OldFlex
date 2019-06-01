@@ -74,3 +74,5 @@ int Generate_Random_Number(int, int);
 void Color_Init();
 
 void Delete_line(SDL_Renderer* renderer);
+
+void Fog(SDL_Renderer* renderer);
