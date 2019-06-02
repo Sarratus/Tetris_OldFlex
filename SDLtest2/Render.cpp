@@ -27,7 +27,61 @@ void Render(int x, int y, SDL_Texture* image, SDL_Renderer* renderer, SDL_Rect* 
 
 	SDL_RenderCopy(renderer, image, srcrect, &pos);
 }
+
+int Figure_Shadow_Renderer(bool figure[10], int x, int y, int& min) {
+
+		int arrayLOL[10][2] = { { 0, 1 }, { 0, 2 }, { 0, 3 }, { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 3 }, { 3, 3 }, { 2, 2 }, { 0, 0 } };
+		int y_del[10] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+		int y_del_floor = NULL;
+
+		for (int i = 0; i < 10; i++)
+			if (*(figure + i))
+				for (int j = 0; j < HEIGHT_OF_PLAYING_FIELD + 4; j++)
+				{
+					if ((y / CELL_SIZE + arrayLOL[i][1] + j) <= 19)
+						if (shadow_sells[x / CELL_SIZE + arrayLOL[i][0]][y / CELL_SIZE + arrayLOL[i][1] + j].square) {
+
+							y_del[i] = j * CELL_SIZE;
+
+							break;
+						}
+					if (y + j * CELL_SIZE == 1000 && y_del_floor == NULL) {
+						y_del_floor = j * 50 - 150;
+					}
+				}
+
+		for (int j = 0; j < 10; j++) {
+			if (y_del[j] < min && y_del[j] != 1) {
+				min = y_del[j];
+			}
+		}
+		if (y_del_floor < min && y_del_floor != 0 && y_del_floor != NULL)
+			min = y_del_floor;
+		
+	return min;
+}
 void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, SDL_Renderer* renderer) {
+	
+	int min = 1150;		
+	
+	thread sh(Figure_Shadow_Renderer, figure, x, y, ref(min));		
+
+	int arrayLOL[10][2] = { { 0, 0 }, { 0, 1 }, { 0, 2 }, { 1, 0 }, { 1, 1 }, { 1, 2 }, { 2, 2 }, { 3, 2 }, { 2, 1 }, { 0, -1 } };
+
+	for (int i = 0; i < 10; i++)
+		if (*(figure + i))
+			if (y + arrayLOL[i][1] * CELL_SIZE >= 0)
+				Render(x + arrayLOL[i][0] * CELL_SIZE, y + arrayLOL[i][1] * CELL_SIZE, block, renderer, &color_of_figure);
+	
+	sh.join();	
+	
+	if (min != 1150)
+		for (int i = 0; i < 10; i++)
+			if (*(figure + i))
+				if (y + min + arrayLOL[i][1] * CELL_SIZE >= 0)
+					Render(x + arrayLOL[i][0] * CELL_SIZE, y + min + arrayLOL[i][1] * CELL_SIZE, block_shadow, renderer, &color_of_figure);			
+}
+void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, SDL_Renderer* renderer, int a) {
 	
 	int arrayLOL[10][2] = { { 0, 0 }, { 0, 1 }, { 0, 2 }, { 1, 0 }, { 1, 1 }, { 1, 2 }, { 2, 2 }, { 3, 2 }, { 2, 1 }, { 0, -1 } };
 
@@ -35,7 +89,6 @@ void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, S
 		if (*(figure + i))
 			if (y + arrayLOL[i][1] * CELL_SIZE >= 0)
 				Render(x + arrayLOL[i][0] * CELL_SIZE, y + arrayLOL[i][1] * CELL_SIZE, block, renderer, &color_of_figure);
-
 }
 void Shadow_Render(SDL_Renderer* renderer) {
 	for (int i = 0; i < WIDTH_OF_PLAYING_FIELD; i++)

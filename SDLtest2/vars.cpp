@@ -6,7 +6,7 @@ int y_pos_of_figure = 0;
 bool pause = false;
 bool process_pause = false;
 
-SDL_Texture* block = nullptr, * block_color = nullptr, * block_dark = nullptr;
+SDL_Texture* block = nullptr, * block_color = nullptr, * block_dark = nullptr,* block_shadow;
 SDL_Texture* background = nullptr, * background_color = nullptr, * background_dark = nullptr;
 
 Shadow_Cell** shadow_sells = nullptr;

@@ -34,7 +34,7 @@ extern int figure_color_next, figure_color_prev;
 
 extern SDL_Rect srcRED, srcYELL, srcBLUE, srcGREEN, srcMAGNT, srcCYAN;
 
-extern SDL_Texture *block, * block_color, * block_dark;
+extern SDL_Texture *block, * block_color, * block_dark,* block_shadow;
 extern SDL_Texture* background,* background_color,* background_dark;
 
 struct Figure { bool figure[10] = { 0,0,0,0,0,0,0,0,0,0 }; int figure_width = 0; };
@@ -55,6 +55,7 @@ extern mutex render;
 void Render(int, int, SDL_Texture*, SDL_Renderer*, SDL_Rect*);
 
 void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, SDL_Renderer* renderer);
+void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, SDL_Renderer* renderer, int a);
 
 void Shadow_Render(SDL_Renderer* renderer);
 
@@ -72,7 +73,7 @@ void Generate_New_Figure(SDL_Rect&, Figure&, int);
 int Generate_Random_Number(int, int);
 
 void Color_Init();
+void Figures_Init();
 
 void Delete_line(SDL_Renderer* renderer);
 
-void Fog(SDL_Renderer* renderer);

@@ -7,7 +7,7 @@
 #include "Var.h"
 
 
-void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Rect color, Figure active, SDL_Window* window) {
+void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Window* window) {
 
 	double angle = 0, angle2 = 0;
 	short int change = 2;
@@ -228,18 +228,7 @@ void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Rect color, Figur
 
 int main(int argc, char * argv[]) {
 	
-	bool loss = false;
-	
-	*(figures + 0) = { { 1,1,1,1,0,0,0,0,0,0 }, {100} };	*(figures + 8) = { { 0,1,0,0,1,0,1,0,1,0 }, {150} };	*(figures + 9) = { { 0,0,1,1,1,1,0,0,0,0 }, {100} };	*(figures + 10) = { { 0,1,1,0,0,1,1,0,0,0 }, {150} };
-	*(figures + 1) = { { 0,1,1,1,1,0,0,0,0,0 }, {100} };	*(figures + 11) = { { 0,1,0,0,1,1,1,0,0,0 }, {150} };
-	*(figures + 2) = { { 1,0,0,1,1,1,0,0,0,0 }, {100} };	*(figures + 17) = { { 0,0,1,0,0,1,1,0,1,0 }, {150} };	*(figures + 18) = { { 1,1,1,0,0,1,0,0,0,0 }, {100} };	*(figures + 19) = { { 0,1,1,0,1,0,0,0,1,0 }, {150} };
-	*(figures + 3) = { { 1,1,0,0,1,1,0,0,0,0 }, {100} };	*(figures + 12) = { { 0,0,1,0,1,1,0,0,1,0 }, {150} };
-	*(figures + 4) = { { 0,0,1,0,0,1,1,1,0,0 }, {200} };	*(figures + 16) = { { 1,1,1,0,0,0,0,0,0,1 }, {50} };
-	*(figures + 5) = { { 0,1,1,0,1,1,0,0,0,0 }, {100} };
-	*(figures + 6) = { { 0,0,1,0,1,1,1,0,0,0 }, {150} };	*(figures + 13) = { { 1,1,1,0,1,0,0,0 }, {100} };		*(figures + 14) = { { 0,1,0,0,1,1,0,0,1,0 }, {150} };	*(figures + 15) = { { 0,1,0,1,1,1,0,0,0,0 }, {100} };
-
-	*(figures + 7) = { { 0,0,0,0,0,0,0,0 }, {0} };
-	
+	Figures_Init();
 	Color_Init();
 
 	shadow_sells = new Shadow_Cell*[WIDTH_OF_PLAYING_FIELD];
@@ -268,19 +257,18 @@ int main(int argc, char * argv[]) {
 	
 	block_color = Image_Load("Squares3.bmp", renderer);
 	block_dark = Image_Load("Squares2.bmp", renderer);
-
+	
 	block = block_color;
 	
 	background_color = Image_Load("backgroung3.bmp", renderer);
 	background_dark = Image_Load("backgroung2.bmp", renderer);
 
-	background = background_color;
+	background = background_color;	
 
-	Figure active;	
-	SDL_Rect color = srcYELL;
-	
+	bool loss = false;
 	bool start = false;
-	thread Menu(Menu, ref(start), ref(loss), ref(renderer), color, active, ref(window));
+
+	thread Menu(Menu, ref(start), ref(loss), ref(renderer), ref(window));
 	
 	while (!start)
 	{
@@ -290,10 +278,7 @@ int main(int argc, char * argv[]) {
 			
 			if (event1.type == SDL_QUIT) {
 				loss = true;
-				start = true;
-				//Menu.~thread();
-				//return 0;
-				//cout << endl << "exit" << endl;
+				start = true;				
 			}
 				
 			
@@ -324,16 +309,37 @@ int main(int argc, char * argv[]) {
 	}
 
 	Menu.join();
+				   
+	if (block == block_color) {
+		SDL_DestroyTexture(background_dark);
+		SDL_DestroyTexture(block_dark);
+
+		block_shadow = Image_Load("Squares3.bmp", renderer);
+	} else {
+		SDL_DestroyTexture(block_color);
+		SDL_DestroyTexture(background_color);
+
+		block_shadow = Image_Load("Squares2.bmp", renderer);
+	}
+		
+	if (block_shadow == nullptr)
+		cout << endl << "ERROR" << endl;
 	
+	Figure active;
+		SDL_Rect color;
+
+		SDL_SetTextureBlendMode(block_shadow, SDL_BLENDMODE_BLEND);
+		SDL_SetTextureAlphaMod(block_shadow, 100);
+
 	if (!loss) {
+
+		Generate_New_Figure(color, active, 1);
 
 		thread th2(The_Game, ref(loss), renderer, ref(color), ref(active));
 		
-		Generate_New_Figure(color, active, 1);
-
 		SDL_RenderClear(renderer);
 		SDL_RenderCopy(renderer, background, NULL, NULL);
-		Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
+		Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer, 1);
 		
 		SDL_RenderPresent(renderer);
 		
