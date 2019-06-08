@@ -15,6 +15,7 @@
 using namespace std;
 
 const unsigned short int SCREEN_WIDTH = 500;
+const unsigned short int UI_WIDTH = 200;
 const unsigned short int SCREEN_HEIGHT = 1000;
 
 const unsigned short int NUMBER_OF_FIGURES = 8;
@@ -23,14 +24,17 @@ const unsigned short int WIDTH_OF_PLAYING_FIELD = 10;
 const unsigned short int HEIGHT_OF_PLAYING_FIELD = 20;
 const unsigned short int CELL_SIZE = 50;
 
-const unsigned int SLEEPING_TIME = 1000;
+extern unsigned int SLEEPING_TIME;
 
 extern int x_pos_of_figure;
 extern int y_pos_of_figure;
 
-extern bool pause, process_pause;
+extern long unsigned int points, points_modifier;
 
-extern int figure_color_next, figure_color_prev;
+extern int number_of_figure_next, previous_figure, previous_figure2;
+extern int figure_color_next, figure_color_prev, figure_color_prev2;
+
+extern bool pause, process_pause;
 
 extern SDL_Rect srcRED, srcYELL, srcBLUE, srcGREEN, srcMAGNT, srcCYAN;
 
@@ -51,8 +55,6 @@ extern mutex render;
 
 /////////////////////////////////////////// FUNCTIONS //////////////////////////////////////////////
 
-
-void Render(int, int, SDL_Texture*, SDL_Renderer*, SDL_Rect*);
 
 void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, SDL_Renderer* renderer);
 void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, SDL_Renderer* renderer, int a);
@@ -77,3 +79,8 @@ void Figures_Init();
 
 void Delete_line(SDL_Renderer* renderer);
 
+void Background_Renderer(SDL_Renderer*);
+
+void Pause_Render(SDL_Renderer* renderer);
+
+void Text_Texture_Init(SDL_Renderer* renderer, SDL_Color text_color);

@@ -21,7 +21,7 @@ void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Window* window) {
 
 	SDL_Rect dst3;
 	dst3.h = 500;		dst3.w = 500;
-	dst3.x = 0;	dst3.y = -230;
+	dst3.x = 100;	dst3.y = -230;
 
 	SDL_Rect dst4;
 	dst4 = dst3;
@@ -46,32 +46,39 @@ void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Window* window) {
 	SDL_Rect Message_rect; 
 	Message_rect.w = 450;
 	Message_rect.h = 30;
-	Message_rect.x = SCREEN_WIDTH / 2 - Message_rect.w / 2 + 2;
+	Message_rect.x = (SCREEN_WIDTH+UI_WIDTH) / 2 - Message_rect.w / 2 + 2;
 	Message_rect.y = 700; 
 
 	SDL_Rect Message_rect_2;
 	Message_rect_2.w = 340;
 	Message_rect_2.h = 15;
-	Message_rect_2.x = SCREEN_WIDTH / 2 - Message_rect_2.w / 2;
+	Message_rect_2.x = (SCREEN_WIDTH + UI_WIDTH) / 2 - Message_rect_2.w / 2;
 	Message_rect_2.y = 775;
 
 
 	SDL_Rect dst6;
-	dst6.h = 160;	dst6.w = 1000;
-	dst6.x = -250;	dst6.y = 665;
+	dst6.h = 160;	dst6.w = 500;
+	dst6.x = 100;	dst6.y = 665;
+
+	SDL_Rect src_back;
+	src_back.h = 50;	src_back.w = 48;
+	src_back.x = 1;		src_back.y = 0;
+
+	SDL_Rect dst7;
+	dst7.h = SCREEN_HEIGHT+40;	dst7.w = SCREEN_WIDTH+UI_WIDTH;
+	dst7.x = 0;	dst7.y = -20;
 
 	while (!start || angle2 < 10) {		
 				
-		SDL_RenderClear(renderer);
-		
+		SDL_RenderClear(renderer);	
+
+		SDL_RenderCopy(renderer, background, &src_back, &dst7);
+
 		SDL_RenderCopy(renderer, block, &srcGREEN, &dst3);
 		SDL_RenderCopy(renderer, block, &srcBLUE, &dst4);
 		SDL_RenderCopy(renderer, block, &srcMAGNT, &dst5);
-
-		//SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, ++angle, NULL, SDL_FLIP_NONE);
-		//SDL_RenderCopyEx(renderer, block, &srcGREEN, &dst2, ++++++angle2, NULL, SDL_FLIP_NONE);
 				
-		SDL_RenderCopy(renderer, background, &srcMAGNT, &dst6);
+		SDL_RenderCopy(renderer, background, &src_back, &dst6);
 		
 		if (block != block_color)
 		{
@@ -82,9 +89,7 @@ void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Window* window) {
 		{
 			SDL_RenderCopyEx(renderer, message_o, NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
 			SDL_RenderCopyEx(renderer, theme_message_o, NULL, &Message_rect_2, NULL, NULL, SDL_FLIP_NONE);
-		}
-		
-		
+		}		
 		
 		if (dst3.y >= 1000)
 		{
@@ -113,7 +118,7 @@ void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Window* window) {
 			dst5.y += 3;
 		}
 
-		SDL_RenderPresent(renderer);
+		render.lock();SDL_RenderPresent(renderer);render.unlock();
 
 		dst.h += change;
 		dst.w += change;
@@ -128,52 +133,47 @@ void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Window* window) {
 		if (start)
 			angle2 += 1;
 	}
-	std::cout << loss;
+	
 	if (!loss)
 	if (start)
 	{		
 		unsigned int opacity = 255, time_pause = 13, steps = 110;
-		double rotation = 1;
-
+		
 		int accel = 2;
 		dst.x = 500;
+		SDL_SetTextureBlendMode(background_color, SDL_BLENDMODE_BLEND);
+		SDL_SetTextureBlendMode(background_dark, SDL_BLENDMODE_BLEND);
 
 		for (int i = 0; i < steps; i++)
 		{			
 			SDL_RenderClear(renderer);
 
-			if (opacity > 2) {
-
+			if (opacity > 2) 
 				if (block != block_color) {
-
-					SDL_SetTextureAlphaMod(message, ------opacity);
-					//SDL_SetTextureAlphaMod(theme_message, opacity);
-				}
-				else
-				{
-					SDL_SetTextureAlphaMod(message_o, ------opacity);
-					//SDL_SetTextureAlphaMod(theme_message_o, opacity);					
-				}
-			}
+					SDL_SetTextureAlphaMod(message, ------opacity);						
+				} else {
+					SDL_SetTextureAlphaMod(message_o, ------opacity);														
+				}			
 				
 			if (angle >= 360)
 				angle -= 360;
-
-			angle += rotation;
-			rotation += 0.03;
-
+			
 			----dst2.x;
 
-			SDL_RenderCopy(renderer, background, NULL, NULL);
+			Background_Renderer(renderer);
+
+			if (block == block_color) {
+				SDL_RenderCopy(renderer, background_color, &src_back, &dst7);
+			} else {
+				SDL_RenderCopy(renderer, background_dark, &src_back, &dst7);
+			}
 			
+
 			SDL_RenderCopy(renderer, block, &srcGREEN, &dst3);
 			SDL_RenderCopy(renderer, block, &srcBLUE, &dst4);
 			SDL_RenderCopy(renderer, block, &srcMAGNT, &dst5);
 
-			SDL_RenderCopy(renderer, background, &srcMAGNT, &dst6);
-
-			//SDL_RenderCopyEx(renderer, block, &srcBLUE, &dst, angle, NULL, SDL_FLIP_NONE);
-			//SDL_RenderCopyEx(renderer, block, &srcGREEN, &dst2, ++++++angle2, NULL, SDL_FLIP_NONE);
+			SDL_RenderCopy(renderer, background, &src_back, &dst6);				
 			
 			if (block != block_color) {
 
@@ -212,14 +212,8 @@ void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Window* window) {
 			}
 
 			accel += 1;
-
-			/*if (block == block_color) {
-
-				SDL_RenderCopyEx(renderer, theme_message, NULL, &Message_rect_2, NULL, NULL, SDL_FLIP_NONE);
-				SDL_RenderCopyEx(renderer, theme_message_o, NULL, &Message_rect_2, NULL, NULL, SDL_FLIP_NONE);
-			}		*/	
-			
-			SDL_RenderPresent(renderer);
+						
+			render.lock();SDL_RenderPresent(renderer);render.unlock();
 
 			this_thread::sleep_for(chrono::milliseconds(time_pause));			
 		}		
@@ -232,6 +226,7 @@ int main(int argc, char * argv[]) {
 	Color_Init();
 
 	shadow_sells = new Shadow_Cell*[WIDTH_OF_PLAYING_FIELD];
+
 	for (int i1 = 0; i1 < WIDTH_OF_PLAYING_FIELD; i1++)
 	{
 		*(shadow_sells + i1) = new Shadow_Cell[HEIGHT_OF_PLAYING_FIELD];
@@ -244,17 +239,20 @@ int main(int argc, char * argv[]) {
 	{
 		//cout << "SDL initialization succeeded!";
 	}
-	SDL_Window *window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+	SDL_Window *window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH+UI_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 	if (window == nullptr) {
 		//cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
 		return 1;
 	}
-	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED/* || SDL_RENDERER_PRESENTVSYNC*/);
+	SDL_SetRenderDrawColor(renderer, 0xFF, 0xFF, 0xFF, 0xFF);
 	if (renderer == nullptr) {
 		//cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
 		return 1;
 	}
-	
+	// 193		201		209		- white 
+	// 19		20		22		- black
+
 	block_color = Image_Load("Squares3.bmp", renderer);
 	block_dark = Image_Load("Squares2.bmp", renderer);
 	
@@ -267,7 +265,7 @@ int main(int argc, char * argv[]) {
 
 	bool loss = false;
 	bool start = false;
-
+	   
 	thread Menu(Menu, ref(start), ref(loss), ref(renderer), ref(window));
 	
 	while (!start)
@@ -276,11 +274,13 @@ int main(int argc, char * argv[]) {
 		
 		while (SDL_PollEvent(&event1)) {
 			
+			
+			
+
 			if (event1.type == SDL_QUIT) {
 				loss = true;
 				start = true;				
-			}
-				
+			}				
 			
 			switch (event1.type) {
 			case SDL_KEYDOWN:
@@ -309,27 +309,45 @@ int main(int argc, char * argv[]) {
 	}
 
 	Menu.join();
-				   
+	Menu.~thread();	 
+	
+	SDL_Color main_color, secondary_color;
+
 	if (block == block_color) {
+
+		main_color = { 193, 201, 209 };
+		secondary_color = { 19, 20, 22 };
+		
 		SDL_DestroyTexture(background_dark);
 		SDL_DestroyTexture(block_dark);
-
+		
 		block_shadow = Image_Load("Squares3.bmp", renderer);
+
+		Text_Texture_Init(renderer, secondary_color);
+
+		SDL_SetRenderDrawColor(renderer, 193, 201, 209, 255);
+
+
 	} else {
+
+		main_color = { 19, 20, 22 };
+		secondary_color = { 193, 201, 209 };
+
 		SDL_DestroyTexture(block_color);
 		SDL_DestroyTexture(background_color);
 
 		block_shadow = Image_Load("Squares2.bmp", renderer);
+
+		Text_Texture_Init(renderer, secondary_color);
+
+		SDL_SetRenderDrawColor(renderer, 19, 20, 22, 255);
 	}
-		
-	if (block_shadow == nullptr)
-		cout << endl << "ERROR" << endl;
-	
-	Figure active;
+
+		Figure active;
 		SDL_Rect color;
 
 		SDL_SetTextureBlendMode(block_shadow, SDL_BLENDMODE_BLEND);
-		SDL_SetTextureAlphaMod(block_shadow, 100);
+		SDL_SetTextureAlphaMod(block_shadow, 80);
 
 	if (!loss) {
 
@@ -338,10 +356,15 @@ int main(int argc, char * argv[]) {
 		thread th2(The_Game, ref(loss), renderer, ref(color), ref(active));
 		
 		SDL_RenderClear(renderer);
-		SDL_RenderCopy(renderer, background, NULL, NULL);
+
+		render.lock();
+
+		Background_Renderer(renderer);
+		Background_Renderer(renderer);
 		Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer, 1);
-		
-		SDL_RenderPresent(renderer);
+		//Background_Renderer(renderer);
+
+		SDL_RenderPresent(renderer);render.unlock();
 		
 		th2.detach();
 	}	
@@ -355,8 +378,17 @@ int main(int argc, char * argv[]) {
 			SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
 			this_thread::sleep_for(chrono::milliseconds(20));
 		}
-			
+		
+		if (points > 4500 * points_modifier) {
+			SLEEPING_TIME /= 2;
+			points_modifier *= 2;
+		}			
+
+		if(y_pos_of_figure>=0)
 		while (SDL_PollEvent(&event) && !process_pause) {
+			
+			/*cout << "event data:";
+			cout << " " << event.type << endl;*/
 			
 			if (event.type == SDL_QUIT)
 				return 0;
@@ -369,6 +401,8 @@ int main(int argc, char * argv[]) {
 				switch (event.key.keysym.sym) {
 				case SDLK_SPACE: {
 
+					process_pause = true;
+					
 					bool on_floor = false;
 					int inert = 45;
 					SDL_Rect flag = color;
@@ -416,28 +450,26 @@ int main(int argc, char * argv[]) {
 							Generate_New_Figure(color, active);
 														
 							SDL_RenderClear(renderer);
-							SDL_RenderCopy(renderer, background, NULL, NULL);
+							Background_Renderer(renderer);
 							Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 							Shadow_Render(renderer);
 
-							SDL_RenderPresent(renderer);
+							render.lock();SDL_RenderPresent(renderer);render.unlock();
 						}
 
 						if (flagB)
 						{
-							y_pos_of_figure += CELL_SIZE;
-
-							render.lock();
+							y_pos_of_figure += CELL_SIZE;							
 
 							SDL_RenderClear(renderer);
 
-							SDL_RenderCopy(renderer, background, NULL, NULL);
+							Background_Renderer(renderer);
 							Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 							Shadow_Render(renderer);
 							
-							SDL_RenderPresent(renderer);
+							render.lock();SDL_RenderPresent(renderer);render.unlock();
 
-							render.unlock();
+							
 
 							this_thread::sleep_for(chrono::milliseconds(inert));
 							if (inert >= 12) {
@@ -446,35 +478,21 @@ int main(int argc, char * argv[]) {
 						};
 					}
 				}
+								 process_pause = false;
 								 this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 10));
 								 break;
 				case SDLK_p: {
-					
-					SDL_Color white;
-
-					if (block != block_color) {
-						white = { 240, 240, 242 };
-					}
-					else
-					{
-						white = { 30, 30, 31 };
-					}					
-					
-					SDL_Rect Message_rect;
-					Message_rect.w = 250;
-					Message_rect.h = 55;
-					Message_rect.x = SCREEN_WIDTH / 2 - Message_rect.w / 2 + 3;
-					Message_rect.y = 300;
+									
 
 					SDL_RenderClear(renderer);
 
-					SDL_RenderCopy(renderer, background, NULL, NULL);
+					Background_Renderer(renderer);
 					Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 					Shadow_Render(renderer);
+					
+					Pause_Render(renderer);
 
-					SDL_RenderCopyEx(renderer, Text_Texture("pause", renderer, white, false, 0), NULL, &Message_rect, NULL, NULL, SDL_FLIP_NONE);
-
-					SDL_RenderPresent(renderer);
+					render.lock();SDL_RenderPresent(renderer);render.unlock();
 
 					pause = true;
 				}
@@ -483,6 +501,8 @@ int main(int argc, char * argv[]) {
 				case SDLK_a: {
 				case SDLK_LEFT: {
 
+					process_pause = true;
+					
 					//cout << "Left arrow pressed";
 					bool flag = true;
 
@@ -508,22 +528,24 @@ int main(int argc, char * argv[]) {
 						x_pos_of_figure -= CELL_SIZE;
 						SDL_RenderClear(renderer);
 						
-						SDL_RenderCopy(renderer, background, NULL, NULL);
+						Background_Renderer(renderer);
 						Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 						Shadow_Render(renderer);
 						
-						SDL_RenderPresent(renderer);
+						render.lock();SDL_RenderPresent(renderer);render.unlock();
 					}
 					flag = true;
+
+					process_pause = false;
 
 					break;
 				}}								
 
 				case SDLK_d: {
 				case SDLK_RIGHT: {
-					if (x_pos_of_figure + active.figure_width == SCREEN_WIDTH) {}
-
-
+					
+					process_pause = true;
+					
 					bool flagR = true;
 
 					int arrayLOL[10][2] = {
@@ -549,13 +571,15 @@ int main(int argc, char * argv[]) {
 						
 						SDL_RenderClear(renderer);
 						
-						SDL_RenderCopy(renderer, background, NULL, NULL);
+						Background_Renderer(renderer);
 						Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 						Shadow_Render(renderer);
 						
-						SDL_RenderPresent(renderer);
+						render.lock();SDL_RenderPresent(renderer);render.unlock();
 					}
 					flagR = true;
+
+					process_pause = false;
 
 					break;
 				}}
@@ -568,7 +592,10 @@ int main(int argc, char * argv[]) {
 					const unsigned int figures_changes[18][2] = { { 0, 8 }, { 8, 9 }, { 9, 10 }, { 10, 0 }, { 1, 11 }, { 11, 1 }, { 3, 12 }, { 12, 3 }, { 6, 13 }, { 13, 14 }, { 14, 15 }, { 15, 6 }, { 4, 16 }, { 16, 4 }, { 2, 17 }, { 17, 18 }, { 18, 19 }, { 19, 2 } };
 
 					for (int i = 0; i < 18; i++)
-						if (equal(begin(active.figure), end(active.figure), begin((figures + figures_changes[i][0])->figure))) {
+						if (equal(begin(active.figure), end(active.figure), begin((figures + figures_changes[i][0])->figure))) 
+							if (x_pos_of_figure + active.figure_width == SCREEN_WIDTH && active.figure_width < (figures + figures_changes[i][1])->figure_width)
+							{} else if (true) {
+
 							active = *(figures + figures_changes[i][1]);
 							is_updated = true;
 							//th2.~thread();
@@ -578,11 +605,11 @@ int main(int argc, char * argv[]) {
 					if (is_updated) {
 						SDL_RenderClear(renderer);
 						
-						SDL_RenderCopy(renderer, background, NULL, NULL);
+						Background_Renderer(renderer);
 						Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 						Shadow_Render(renderer);
 						
-						SDL_RenderPresent(renderer);
+						render.lock();SDL_RenderPresent(renderer);render.unlock();
 					}
 					this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 8));
 					break;
@@ -631,11 +658,11 @@ int main(int argc, char * argv[]) {
 
 						SDL_RenderClear(renderer);
 						
-						SDL_RenderCopy(renderer, background, NULL, NULL);
+						Background_Renderer(renderer);
 						Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 						Shadow_Render(renderer);
 						
-						SDL_RenderPresent(renderer);
+						render.lock();SDL_RenderPresent(renderer);render.unlock();
 					}
 
 					if (flagB && !loss)
@@ -644,11 +671,11 @@ int main(int argc, char * argv[]) {
 
 						SDL_RenderClear(renderer);
 						
-						SDL_RenderCopy(renderer, background, NULL, NULL);
+						Background_Renderer(renderer);
 						Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
 						Shadow_Render(renderer);
 
-						SDL_RenderPresent(renderer);
+						render.lock();SDL_RenderPresent(renderer);render.unlock();
 					}
 
 					break;
@@ -667,20 +694,8 @@ int main(int argc, char * argv[]) {
 			}				
 			}
 		}
-		this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 20));
+		this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 17));
 	}
-	
-	//cout << "End of the cycle - " << loss;
-		
-	//if (loss)
-	//{
-	//	cout << "You are loss. NOOB! (Hahahahahahahah)";
-	//	this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME * 20));
-	//}
-	//else
-	//{
-	//	//cout << endl << endl << "CRTITCAL ERROR!!!" << endl;
-	//}
 	
 	SDL_DestroyWindow(window);
 	SDL_Quit();
