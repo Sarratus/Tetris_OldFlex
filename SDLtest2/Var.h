@@ -60,6 +60,7 @@ void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, S
 void Figures_Renderer(bool figure[10], SDL_Rect color_of_figure, int x, int y, SDL_Renderer* renderer, int a);
 
 void Shadow_Render(SDL_Renderer* renderer);
+void Shadow_Render(SDL_Renderer* renderer, int del_x);
 
 SDL_Texture* Image_Load(string image, SDL_Renderer* renderer);
 
@@ -84,3 +85,5 @@ void Background_Renderer(SDL_Renderer*);
 void Pause_Render(SDL_Renderer* renderer);
 
 void Text_Texture_Init(SDL_Renderer* renderer, SDL_Color text_color);
+
+int Figure_Shadow_Renderer(bool figure[10], int x, int y, int& min);

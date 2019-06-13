@@ -1,4 +1,5 @@
 #include <SDL.h>
+#include <SDL_mixer.h>
 #include <thread>
 #include <iostream>
 #include <random>
@@ -11,7 +12,7 @@ void Delete_line(SDL_Renderer* renderer) {
 
 	process_pause = true;
 	
-	int a = 0;
+	vector<int> to_del;
 
 	for (int i = 0; i < HEIGHT_OF_PLAYING_FIELD; i++)
 		if (
@@ -25,38 +26,43 @@ void Delete_line(SDL_Renderer* renderer) {
 			shadow_sells[7][i].square &&
 			shadow_sells[8][i].square &&
 			shadow_sells[9][i].square
-		) {
-								
-			if (a == 0)
-				this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 12));
-			
-			++a;
-					   
-			//cout << "\nLine cheked!\n";
-			
-			//SDL_Rect viewport = { 0, i * CELL_SIZE, SCREEN_WIDTH, CELL_SIZE };
-			//SDL_RenderSetViewport(renderer, &viewport);
+			) {
+		
+			to_del.push_back(i);
+		}
+	
+	if (!to_del.empty()){
 
-			for (int j = 0; j < WIDTH_OF_PLAYING_FIELD; j++)
+		Mix_Chunk* line = Mix_LoadWAV("line.wav");
+		Mix_Chunk* down = Mix_LoadWAV("down.wav");
+		
+			this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 8));
+						
+			for (int j = 0; j < WIDTH_OF_PLAYING_FIELD/2; j++)
 			{
-				this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 20));
-				
+							
 				SDL_RenderClear(renderer);
 				
 				Background_Renderer(renderer);
-				shadow_sells[j][i].square = false;
+				
+				for (auto i = to_del.begin(); i != to_del.end(); i++) {
+					shadow_sells[WIDTH_OF_PLAYING_FIELD / 2 - j - 1	][*i].square = false;
+					shadow_sells[WIDTH_OF_PLAYING_FIELD / 2 + j		][*i].square = false;
+				}				
+								
 				Shadow_Render(renderer);
+				
+				Mix_PlayChannel(-1, line, 0);
 				
 				render.lock();SDL_RenderPresent(renderer);render.unlock();
 
+				this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 19 + SLEEPING_TIME / (j+1) / 22));
 			}
+				
 
-			//SDL_RenderSetViewport(renderer, NULL);
-
-			SDL_RenderClear(renderer);
-
+			for (auto i = to_del.begin(); i!=to_del.end(); i++)
 			for (int j = 0; j < WIDTH_OF_PLAYING_FIELD; j++)
-				for (int k = i - 1; k >= 0; k--)
+				for (int k = *i - 1; k >= 0; k--)
 				{
 					if (shadow_sells[j][k].square) {
 						shadow_sells[j][k + 1].square = shadow_sells[j][k].square;
@@ -64,31 +70,45 @@ void Delete_line(SDL_Renderer* renderer) {
 						shadow_sells[j][k + 1].color = shadow_sells[j][k].color;
 					}
 				}
-
-			switch (a)
+			
+			switch (to_del.size())
 			{
 			case 1:
-				points += 100;
+				points += 100 * points_modifier;
 				break;
 			case 2:
-				points += 200;
+				points += 300 * points_modifier;
 				break;
 			case 3:
-				points += 400;
+				points += 700 * points_modifier;
 				break;
 			case 4:
-				points += 800;
+				points += 1500 * points_modifier;
 				break;
 			}
-			//cout << endl << points << endl;
 
-			this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 8));
-			
+			this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 13));
+
+			SDL_RenderClear(renderer);
+									
 			Background_Renderer(renderer);
 			Shadow_Render(renderer);
-			render.lock();SDL_RenderPresent(renderer);render.unlock();
-						
-		}
+			
+			Mix_PlayChannel(-1, down, 0);
+
+			render.lock();SDL_RenderPresent(renderer);render.unlock();						
+			
+			this_thread::sleep_for(chrono::milliseconds(200));
+
+			if (down != NULL) {
+				Mix_FreeChunk(down);
+				Mix_FreeChunk(line);
+				line = NULL;
+				down = NULL;
+			}
+	}
+
+			
 
 	this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 3));
 

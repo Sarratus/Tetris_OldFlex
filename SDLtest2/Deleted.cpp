@@ -100,3 +100,85 @@
 		//}		
 
 ////////////// ANIMATIONS /////////////////////////////////////////////////////////////////////
+
+////////////// OLD SPACE //////////////////////////////////////////////////////////////////////
+
+/*
+
+					bool on_floor = false;
+					int inert = 45;
+					SDL_Rect flag = color;
+
+					while (!on_floor && !loss && flag.x == color.x) {
+
+						bool flagB = true;
+
+						unsigned short int arrayKEK[4] = { 2, 5, 6, 7 };
+
+						for (auto i = 0; i < 4; i++)
+							if (*(active.figure + arrayKEK[i]))
+								if (y_pos_of_figure >= CELL_SIZE * 17) {
+									on_floor = true;
+
+									Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
+									active = *(figures + 7);
+
+									flagB = false;
+
+								}
+								else {
+
+									int arrayLOL[10][2] = { { 0, 1 }, { 0, 2 }, { 0, 3 }, { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 3 }, { 3, 3 }, { 2, 2 }, { 0, 0 } };
+
+									for (int i = 0; i < 10; i++)
+										if (*(active.figure + i))
+											if (shadow_sells[x_pos_of_figure / CELL_SIZE + arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) { flagB = false; on_floor = true; }
+
+									if (!flagB) {
+										if (y_pos_of_figure == 0) {
+
+											loss = true;
+										}
+
+										Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
+										active = *(figures + 7);
+									}
+								}
+
+						if (!flagB && !loss) {
+
+							Delete_line(renderer);
+
+							Generate_New_Figure(color, active);
+
+							SDL_RenderClear(renderer);
+							Background_Renderer(renderer);
+							Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
+							Shadow_Render(renderer);
+
+							render.lock();SDL_RenderPresent(renderer);render.unlock();
+						}
+
+						if (flagB)
+						{
+							y_pos_of_figure += CELL_SIZE;
+
+							SDL_RenderClear(renderer);
+
+							Background_Renderer(renderer);
+							Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
+							Shadow_Render(renderer);
+
+							render.lock();SDL_RenderPresent(renderer);render.unlock();
+
+
+
+							this_thread::sleep_for(chrono::milliseconds(inert));
+							if (inert >= 12) {
+								inert -= 12;
+							}
+						};
+					}
+					*/
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////

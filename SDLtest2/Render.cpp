@@ -1,5 +1,6 @@
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <SDL_image.h>
 #include <string>
 #include <iostream>
 #include <vector>
@@ -10,16 +11,32 @@ SDL_Rect numbers_text[10];
 
 SDL_Texture* Image_Load(string image, SDL_Renderer* renderer) {
 	
-	SDL_Surface* load_image = nullptr;
-	SDL_Texture* texture = nullptr;
-
-	load_image = SDL_LoadBMP(image.c_str());
-	if (load_image != nullptr)
+	if (IMG_Init(IMG_INIT_PNG))
 	{
-		texture = SDL_CreateTextureFromSurface(renderer, load_image);
-		SDL_FreeSurface(load_image);
+		SDL_Surface* load_image = nullptr;
+		SDL_Texture* texture = nullptr;
+
+		load_image = IMG_Load(image.c_str());
+		if (load_image != nullptr)
+		{
+			texture = SDL_CreateTextureFromSurface(renderer, load_image);
+			SDL_FreeSurface(load_image);
+		}
+		else
+		{
+			cout << "Error to load image : " << SDL_GetError();
+		}
+
+		IMG_Quit();
+
+		return texture;
 	}
-	return texture;
+	else
+	{
+		cout << "PNG load error : " << SDL_GetError();
+		
+		return 0;
+	}	
 }
 void Render(int x, int y, SDL_Texture* image, SDL_Renderer* renderer, SDL_Rect* srcrect, int block_size)
 {
@@ -200,6 +217,16 @@ void Shadow_Render(SDL_Renderer* renderer) {
 			if (shadow_sells[i][j].square)
 			{
 				Render(i * CELL_SIZE, j * CELL_SIZE, block, renderer, &shadow_sells[i][j].color, CELL_SIZE);
+			}
+		}
+}
+
+void Shadow_Render(SDL_Renderer* renderer, int del_x) {
+	for (int i = 0; i < WIDTH_OF_PLAYING_FIELD; i++)
+		for (int j = 0; j < HEIGHT_OF_PLAYING_FIELD; j++) {
+			if (shadow_sells[i][j].square)
+			{
+				Render(i * CELL_SIZE, j * CELL_SIZE + del_x, block, renderer, &shadow_sells[i][j].color, CELL_SIZE);
 			}
 		}
 }

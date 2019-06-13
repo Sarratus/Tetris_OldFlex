@@ -1,14 +1,13 @@
 #include <algorithm>
 #include <iostream>
 #include <SDL.h>
+#include <SDL_mixer.h>
 #include <thread>
 #include <chrono>
-#include <mutex>
 #include "Var.h"
 
-
 void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Window* window) {
-
+	
 	double angle = 0, angle2 = 0;
 	short int change = 2;
 	SDL_Rect dst;
@@ -69,7 +68,7 @@ void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Window* window) {
 	dst7.x = 0;	dst7.y = -20;
 
 	while (!start || angle2 < 10) {		
-				
+		
 		SDL_RenderClear(renderer);	
 
 		SDL_RenderCopy(renderer, background, &src_back, &dst7);
@@ -134,15 +133,19 @@ void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Window* window) {
 			angle2 += 1;
 	}
 	
+	Mix_Chunk* whoosh = Mix_LoadWAV("whoosh.wav");
+
 	if (!loss)
 	if (start)
 	{		
 		unsigned int opacity = 255, time_pause = 13, steps = 110;
 		
-		int accel = 2;
+		float accel = 2;
 		dst.x = 500;
 		SDL_SetTextureBlendMode(background_color, SDL_BLENDMODE_BLEND);
 		SDL_SetTextureBlendMode(background_dark, SDL_BLENDMODE_BLEND);
+
+		Mix_PlayChannel(-1, whoosh, 0);
 
 		for (int i = 0; i < steps; i++)
 		{			
@@ -185,39 +188,45 @@ void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Window* window) {
 			}	
 			
 			dst.x -= 3;
-			dst6.w -= accel;
+			dst6.x -= accel;
 
-			if (dst3.y > 0 && dst3.y < 500) {
-				dst3.x += accel;
-			}
-			else
-			{
-				dst3.x -= accel;
-			}
+			//if (dst6.x < -dst.w / 2) {
+				if (dst3.y > 0 && dst3.y < 500) {
+					dst3.x += accel;
+				}
+				else
+				{
+					dst3.x -= accel;
+				}
+
+				if (dst4.y > 0 && dst4.y < 500) {
+					dst4.x += accel;
+				}
+				else
+				{
+					dst4.x -= accel;
+				}
+
+				if (dst5.y > 0 && dst5.y < 500) {
+					dst5.x += accel;
+				}
+				else
+				{
+					dst5.x -= accel;
+				}
+				
+				//accel -= 0.3;
+			//}
 			
-			if (dst4.y > 0 && dst4.y < 500) {
-				dst4.x += accel;
-			}
-			else
-			{
-				dst4.x -= accel;
-			}
-
-			if (dst5.y > 0 && dst5.y < 500) {
-				dst5.x += accel;
-			}
-			else
-			{
-				dst5.x -= accel;
-			}
-
 			accel += 1;
-						
+			
 			render.lock();SDL_RenderPresent(renderer);render.unlock();
 
 			this_thread::sleep_for(chrono::milliseconds(time_pause));			
 		}		
 	}
+
+	Mix_FreeChunk(whoosh);
 }
 
 int main(int argc, char * argv[]) {
@@ -239,6 +248,9 @@ int main(int argc, char * argv[]) {
 	{
 		//cout << "SDL initialization succeeded!";
 	}
+	
+	Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048);
+
 	SDL_Window *window = SDL_CreateWindow("Tetris", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH+UI_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 	if (window == nullptr) {
 		//cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
@@ -253,19 +265,21 @@ int main(int argc, char * argv[]) {
 	// 193		201		209		- white 
 	// 19		20		22		- black
 
-	block_color = Image_Load("Squares3.bmp", renderer);
-	block_dark = Image_Load("Squares2.bmp", renderer);
+	block_color = Image_Load("Squares3.PNG", renderer);
+	block_dark = Image_Load("Squares2.png", renderer);
 	
 	block = block_color;
 	
-	background_color = Image_Load("backgroung3.bmp", renderer);
-	background_dark = Image_Load("backgroung2.bmp", renderer);
+	background_color = Image_Load("backgroung3.PNG", renderer);
+	background_dark = Image_Load("backgroung2.png", renderer);
 
 	background = background_color;	
 
 	bool loss = false;
 	bool start = false;
-	   
+	
+	Mix_Chunk* click = Mix_LoadWAV("click.wav");
+	
 	thread Menu(Menu, ref(start), ref(loss), ref(renderer), ref(window));
 	
 	while (!start)
@@ -291,15 +305,21 @@ int main(int argc, char * argv[]) {
 						break;
 						}
 
-						case SDLK_1: {
-							block = block_color;
-							background = background_color;
+						case SDLK_1: {							
+							if (block != block_color) {
+								Mix_PlayChannel(-1, click, 0);
+								block = block_color;
+								background = background_color;
+							}							
 							break;
 						}
 
 						case SDLK_2: {
-							block = block_dark;
-							background = background_dark;
+							if (block == block_color) {
+								Mix_PlayChannel(-1, click, 0);
+								block = block_dark;
+								background = background_dark;
+							}
 							break;
 						}							
 				}
@@ -321,7 +341,7 @@ int main(int argc, char * argv[]) {
 		SDL_DestroyTexture(background_dark);
 		SDL_DestroyTexture(block_dark);
 		
-		block_shadow = Image_Load("Squares3.bmp", renderer);
+		block_shadow = Image_Load("Squares3.png", renderer);
 
 		Text_Texture_Init(renderer, secondary_color);
 
@@ -336,7 +356,7 @@ int main(int argc, char * argv[]) {
 		SDL_DestroyTexture(block_color);
 		SDL_DestroyTexture(background_color);
 
-		block_shadow = Image_Load("Squares2.bmp", renderer);
+		block_shadow = Image_Load("Squares2.png", renderer);
 
 		Text_Texture_Init(renderer, secondary_color);
 
@@ -346,11 +366,13 @@ int main(int argc, char * argv[]) {
 		Figure active;
 		SDL_Rect color;
 
+		Mix_Chunk* drop = Mix_LoadWAV("drop.wav");
+		
 		SDL_SetTextureBlendMode(block_shadow, SDL_BLENDMODE_BLEND);
 		SDL_SetTextureAlphaMod(block_shadow, 80);
 
 	if (!loss) {
-
+				
 		Generate_New_Figure(color, active, 1);
 
 		thread th2(The_Game, ref(loss), renderer, ref(color), ref(active));
@@ -369,10 +391,13 @@ int main(int argc, char * argv[]) {
 		th2.detach();
 	}	
 
+	while (y_pos_of_figure <= -50)
+		this_thread::sleep_for(chrono::milliseconds(100));
+	
+	SDL_Event event;
 	while (!loss) {
 		//cout << "chityy";
-		SDL_Event event;
-		
+				
 		while (process_pause) {
 
 			SDL_FlushEvents(SDL_FIRSTEVENT, SDL_LASTEVENT);
@@ -402,81 +427,66 @@ int main(int argc, char * argv[]) {
 				case SDLK_SPACE: {
 
 					process_pause = true;
+					int min = 1150;
+
+					Figure_Shadow_Renderer(active.figure, x_pos_of_figure, y_pos_of_figure, min);
 					
-					bool on_floor = false;
-					int inert = 45;
-					SDL_Rect flag = color;
+					if (min == 0) {
+						loss = true;
+						break;
+					}			
 
-					while (!on_floor && !loss && flag.x == color.x) {
+					int downside = CELL_SIZE;
 
-						bool flagB = true;
+					if (equal(begin(active.figure), end(active.figure), begin((figures + 10)->figure)) || equal(begin(active.figure), end(active.figure), begin((figures + 4)->figure)) || equal(begin(active.figure), end(active.figure), begin((figures + 17)->figure)) || equal(begin(active.figure), end(active.figure), begin((figures + 6)->figure)))
+						downside = CELL_SIZE * 2;
 
-						unsigned short int arrayKEK[4] = { 2, 5, 6, 7 };
+					if (equal(begin(active.figure), end(active.figure), begin((figures + 9)->figure)) || equal(begin(active.figure), end(active.figure), begin((figures + 18)->figure)))
+						downside = CELL_SIZE * 3;
 
-						for (auto i = 0; i < 4; i++)
-							if (*(active.figure + arrayKEK[i]))
-								if (y_pos_of_figure >= CELL_SIZE * 17) {
-									on_floor = true;
+					SDL_Rect blink = { x_pos_of_figure, y_pos_of_figure+downside, active.figure_width, SCREEN_HEIGHT };
 
-									Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
-									active = *(figures + 7);
+					SDL_Rect block_shadow_rect = { 5, 10, 290, 30 };
 
-									flagB = false;
+					SDL_RenderClear(renderer);
 
-								}
-								else {
+					Background_Renderer(renderer);
+					
+					SDL_RenderCopy(renderer, block_shadow, &block_shadow_rect, &blink);
+					Shadow_Render(renderer);
+					Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer, 1);
 
-									int arrayLOL[10][2] = { { 0, 1 }, { 0, 2 }, { 0, 3 }, { 1, 1 }, { 1, 2 }, { 1, 3 }, { 2, 3 }, { 3, 3 }, { 2, 2 }, { 0, 0 } };
+					this_thread::sleep_for(chrono::milliseconds(int(SLEEPING_TIME / 18)));
 
-									for (int i = 0; i < 10; i++)
-										if (*(active.figure + i))
-											if (shadow_sells[x_pos_of_figure / CELL_SIZE + arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) { flagB = false; on_floor = true; }
+					Mix_PlayChannel(-1, drop, 0);
 
-									if (!flagB) {
-										if (y_pos_of_figure == 0) {
+					render.lock(); SDL_RenderPresent(renderer); render.unlock();					
 
-											loss = true;
-										}
+					y_pos_of_figure += min;
+					Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
+					
+					active = *(figures + 7);
+					
+					SDL_RenderClear(renderer);
 
-										Rewrite_of_shadow_cells(active, x_pos_of_figure, y_pos_of_figure, color);
-										active = *(figures + 7);
-									}
-								}
+					Background_Renderer(renderer);
+					Shadow_Render(renderer);
 
-						if (!flagB && !loss) {
+					this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 7));
 
-							Delete_line(renderer);
+					render.lock(); SDL_RenderPresent(renderer); render.unlock();
+					
+					Delete_line(renderer);
 
-							Generate_New_Figure(color, active);
-														
-							SDL_RenderClear(renderer);
-							Background_Renderer(renderer);
-							Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
-							Shadow_Render(renderer);
+					Generate_New_Figure(color, active);
 
-							render.lock();SDL_RenderPresent(renderer);render.unlock();
-						}
+					SDL_RenderClear(renderer);
+					Background_Renderer(renderer);
+					Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
+					Shadow_Render(renderer);				
 
-						if (flagB)
-						{
-							y_pos_of_figure += CELL_SIZE;							
-
-							SDL_RenderClear(renderer);
-
-							Background_Renderer(renderer);
-							Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
-							Shadow_Render(renderer);
-							
-							render.lock();SDL_RenderPresent(renderer);render.unlock();
-
-							
-
-							this_thread::sleep_for(chrono::milliseconds(inert));
-							if (inert >= 12) {
-								inert -= 12;
-							}
-						};
-					}
+					render.lock(); SDL_RenderPresent(renderer); render.unlock();
+										
 				}
 								 process_pause = false;
 								 this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 10));
@@ -491,6 +501,8 @@ int main(int argc, char * argv[]) {
 					Shadow_Render(renderer);
 					
 					Pause_Render(renderer);
+
+					Mix_PlayChannel(-1, click, 0);
 
 					render.lock();SDL_RenderPresent(renderer);render.unlock();
 
@@ -552,8 +564,7 @@ int main(int argc, char * argv[]) {
 							{1, 0}, {1, 1}, {1, 2}, {2, 0}, {2, 1}, {2, 2}, {3, 3}, {4, 3}, {3, 2}, {1, -1} };
 
 					if (x_pos_of_figure + active.figure_width == SCREEN_WIDTH) {
-						flagR = false;
-						//cout << "LOL2!";
+						flagR = false;						
 					}
 					else {
 						if (x_pos_of_figure != SCREEN_WIDTH - active.figure_width)
@@ -561,8 +572,7 @@ int main(int argc, char * argv[]) {
 							for (int i = 0; i < 10; i++)
 								if (*(active.figure + i))
 									if (shadow_sells[x_pos_of_figure / CELL_SIZE + arrayLOL[i][0]][y_pos_of_figure / CELL_SIZE + arrayLOL[i][1]].square) {
-										flagR = false;
-										//cout << "\nLOL! - " << flagR;
+										flagR = false;										
 									}
 						}
 					}
@@ -688,6 +698,7 @@ int main(int argc, char * argv[]) {
 				case SDLK_p: {
 
 					pause = false;
+					Mix_PlayChannel(-1, click, 0);
 				}
 							 break;
 				}
@@ -698,6 +709,8 @@ int main(int argc, char * argv[]) {
 	}
 	
 	SDL_DestroyWindow(window);
+	Mix_CloseAudio();
+	
 	SDL_Quit();
 
 	return 0;	
