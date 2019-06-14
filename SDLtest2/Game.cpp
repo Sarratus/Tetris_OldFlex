@@ -33,8 +33,8 @@ void Delete_line(SDL_Renderer* renderer) {
 	
 	if (!to_del.empty()){
 
-		Mix_Chunk* line = Mix_LoadWAV("line.wav");
-		Mix_Chunk* down = Mix_LoadWAV("down.wav");
+		Mix_Chunk* line = Mix_LoadWAV("assets\\line.wav");
+		Mix_Chunk* down = Mix_LoadWAV("assets\\down.wav");
 		
 			this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 8));
 						

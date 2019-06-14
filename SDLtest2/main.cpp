@@ -133,7 +133,7 @@ void Menu(bool& start, bool& loss, SDL_Renderer* renderer, SDL_Window* window) {
 			angle2 += 1;
 	}
 	
-	Mix_Chunk* whoosh = Mix_LoadWAV("whoosh.wav");
+	Mix_Chunk* whoosh = Mix_LoadWAV("assets\\whoosh.wav");
 
 	if (!loss)
 	if (start)
@@ -265,20 +265,21 @@ int main(int argc, char * argv[]) {
 	// 193		201		209		- white 
 	// 19		20		22		- black
 
-	block_color = Image_Load("Squares3.PNG", renderer);
-	block_dark = Image_Load("Squares2.png", renderer);
+	block_color = Image_Load("assets\\Squares3.PNG", renderer);
+	block_dark = Image_Load("assets\\Squares2.png", renderer);
 	
 	block = block_color;
 	
-	background_color = Image_Load("backgroung3.PNG", renderer);
-	background_dark = Image_Load("backgroung2.png", renderer);
+	background_color = Image_Load("assets\\backgroung3.PNG", renderer);
+	background_dark = Image_Load("assets\\backgroung2.png", renderer);
 
 	background = background_color;	
 
 	bool loss = false;
 	bool start = false;
-	
-	Mix_Chunk* click = Mix_LoadWAV("click.wav");
+	bool quit = false;
+
+	Mix_Chunk* click = Mix_LoadWAV("assets\\click.wav");
 	
 	thread Menu(Menu, ref(start), ref(loss), ref(renderer), ref(window));
 	
@@ -286,13 +287,11 @@ int main(int argc, char * argv[]) {
 	{
 		SDL_Event event1;
 		
-		while (SDL_PollEvent(&event1)) {
-			
-			
-			
+		while (SDL_PollEvent(&event1)) {			
 
 			if (event1.type == SDL_QUIT) {
 				loss = true;
+				quit = true;
 				start = true;				
 			}				
 			
@@ -337,11 +336,11 @@ int main(int argc, char * argv[]) {
 
 		main_color = { 193, 201, 209 };
 		secondary_color = { 19, 20, 22 };
-		
+
 		SDL_DestroyTexture(background_dark);
 		SDL_DestroyTexture(block_dark);
 		
-		block_shadow = Image_Load("Squares3.png", renderer);
+		block_shadow = Image_Load("assets\\Squares3.png", renderer);
 
 		Text_Texture_Init(renderer, secondary_color);
 
@@ -356,20 +355,24 @@ int main(int argc, char * argv[]) {
 		SDL_DestroyTexture(block_color);
 		SDL_DestroyTexture(background_color);
 
-		block_shadow = Image_Load("Squares2.png", renderer);
+		block_shadow = Image_Load("assets\\Squares2.png", renderer);
 
 		Text_Texture_Init(renderer, secondary_color);
 
 		SDL_SetRenderDrawColor(renderer, 19, 20, 22, 255);
-	}
+	}	
 
 		Figure active;
 		SDL_Rect color;
 
-		Mix_Chunk* drop = Mix_LoadWAV("drop.wav");
+		Mix_Chunk* drop = Mix_LoadWAV("assets\\drop.wav");
 		
 		SDL_SetTextureBlendMode(block_shadow, SDL_BLENDMODE_BLEND);
 		SDL_SetTextureAlphaMod(block_shadow, 80);
+
+	//thread th2(The_Game, ref(loss), renderer, ref(color), ref(active));
+
+	//RESTART:
 
 	if (!loss) {
 				
@@ -395,7 +398,7 @@ int main(int argc, char * argv[]) {
 		this_thread::sleep_for(chrono::milliseconds(100));
 	
 	SDL_Event event;
-	while (!loss) {
+	while (!loss && !quit) {
 		//cout << "chityy";
 				
 		while (process_pause) {
@@ -415,8 +418,12 @@ int main(int argc, char * argv[]) {
 			/*cout << "event data:";
 			cout << " " << event.type << endl;*/
 			
-			if (event.type == SDL_QUIT)
+			if (event.type == SDL_QUIT) {
+				loss = true;
+				quit = true;
 				return 0;
+			}
+				
 
 			switch (event.type) {
 			case SDL_KEYDOWN:
@@ -707,10 +714,59 @@ int main(int argc, char * argv[]) {
 		}
 		this_thread::sleep_for(chrono::milliseconds(SLEEPING_TIME / 17));
 	}
+
+		
+	if (loss && !quit) {
+		Mix_Chunk* loss = Mix_LoadWAV("assets//game over.wav");
+		
+		SDL_Texture* game_over = Text_Texture("GAME OVER", renderer, secondary_color, false, 0);
+
+		SDL_Rect game_over_rect_dst;
 	
+		game_over_rect_dst.w = SCREEN_WIDTH / 3 * 2;
+		game_over_rect_dst.h = game_over_rect_dst.w / 9;
+		game_over_rect_dst.x = SCREEN_WIDTH / 2 - game_over_rect_dst.w / 2 + 4;
+		game_over_rect_dst.y = SCREEN_HEIGHT / 2;
+
+		Mix_PlayChannel(-1, loss, 0);
+
+		while (!quit) {
+			SDL_RenderClear(renderer);
+
+			Background_Renderer(renderer);
+			//Figures_Renderer(active.figure, color, x_pos_of_figure, y_pos_of_figure, renderer);
+			Shadow_Render(renderer);
+			SDL_RenderCopy(renderer, game_over, NULL, &game_over_rect_dst);
+
+			render.lock(); SDL_RenderPresent(renderer); render.unlock();
+
+			SDL_Event event_local;
+			
+			if (SDL_PollEvent(&event_local)) {
+				if (event_local.type == SDL_QUIT) {
+					quit = true;
+				}
+
+				switch (event_local.type) {
+				case SDL_KEYDOWN:
+					switch (event_local.key.keysym.sym) {
+					case SDLK_ESCAPE: {
+						quit = true;
+						break;
+					}
+					}
+				}
+			}				
+
+			this_thread::sleep_for(chrono::milliseconds(100));
+		}		
+
+		Mix_FreeChunk(loss);
+		SDL_DestroyTexture(game_over);
+	}
+
 	SDL_DestroyWindow(window);
-	Mix_CloseAudio();
-	
+	Mix_CloseAudio();	
 	SDL_Quit();
 
 	return 0;	

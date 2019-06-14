@@ -269,7 +269,7 @@ SDL_Texture* Text_Texture(const char* Text, SDL_Renderer* renderer, SDL_Color Co
 
 		TTF_Font* Sans = nullptr;
 				
-		Sans = TTF_OpenFont("Pixelnaya_Zalupa.ttf", 26);
+		Sans = TTF_OpenFont("assets\\Pixelnaya_Zalupa.ttf", 26);
 		
 		SDL_Surface* message_surface = nullptr;
 		SDL_Texture* message = nullptr;
